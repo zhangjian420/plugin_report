@@ -1,0 +1,9 @@
+[info]
+name = report
+version = 1.0.0
+longname = 报告管理
+author = liangsir
+email = 
+homepage = 
+url = 
+compat = 1.2.4
