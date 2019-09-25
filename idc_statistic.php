@@ -2,7 +2,7 @@
 $idc_statistic_actions = array(
     21 => __('删除'),
     22 => __('下载'),
-    23 => __('导出')
+    23 => __('立即执行')
 );
 //IDC统计新增编辑页面
 function idc_statistic_edit(){
@@ -458,7 +458,7 @@ function idc_statistic_import(){
     $report_idc_statistic= db_fetch_row_prepared('SELECT * FROM plugin_report_idc_statistic WHERE id = ?', array($idc_statistic_id));
     $report_idc_statistic_excel_array= db_fetch_assoc("SELECT * FROM plugin_report_idc_statistic_excel WHERE  excel_type='手工统计' and report_idc_statistic_id = ". $idc_statistic_id . " order by last_modified desc limit 10");
     form_start('report.php');
-    html_start_box('导出', '60%', '', '3', 'center', '');
+    html_start_box('立即执行', '60%', '', '3', 'center', '');
     print "<input type='hidden' name='idc_statistic_id' value='" . $report_idc_statistic['id'] . "'/>\n";
     print "<input type='hidden' name='action' value='do_idc_statistic_import'/>\n";
     print "<table style='width:100%'>";
@@ -471,7 +471,7 @@ function idc_statistic_import(){
                 <td class='textArea' style='padding-left: 40px;padding-bottom: 15px;' class='odd'>
                     <div class='itemlist'>
                     起止日期<input type='text' name='idc_statistic_import_begin_date' id='idc_statistic_import_begin_date'/>-<input type='text' name='idc_statistic_import_end_date' id='idc_statistic_import_end_date'/>
-                    <input type='submit' id='submit' value='导出' role='button'>
+                    <input type='submit' id='submit' value='立即执行' role='button'>
                     <input type='button' onclick='window.location.href=\"report.php?action=idc_statistic\"' value='返回' role='button'>
                     </div>
                 </td>

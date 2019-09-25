@@ -1,7 +1,7 @@
 <?php
-chdir(dirname(__FILE__));
-chdir('../../');
-include_once('./include/global.php');
+chdir(__DIR__);
+chdir("../../");
+require("./include/cli_check.php");
 include_once($config['base_path'] . '/lib/rrd.php');
 include_once($config['base_path'] . '/plugins/report/report_functions.php');//报表管理公共函数文件
 cacti_log("<<<<<<<<<<<<<<<<IDC统计详情时任务执行>>>>>>>>>>>>>>>> " . date('Y-m-d H:i:s', time()));

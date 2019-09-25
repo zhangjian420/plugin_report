@@ -2,7 +2,7 @@
 $traffic_settlement_actions = array(
     11 => __('删除'),
     12 => __('下载'),
-    13 => __('导出')
+    13 => __('立即执行')
 );
 //流量结算统计新增编辑页面
 function traffic_settlement_edit(){
@@ -430,7 +430,7 @@ function traffic_settlement_import(){
     $report_traffic_settlement= db_fetch_row_prepared('SELECT * FROM plugin_report_traffic_settlement WHERE id = ?', array($traffic_settlement_id));
     $report_traffic_settlement_excel_array= db_fetch_assoc("SELECT * FROM plugin_report_traffic_settlement_excel WHERE  excel_type='手工统计' and report_traffic_settlement_id = ". $traffic_settlement_id . " order by last_modified desc limit 10");
     form_start('report.php');
-    html_start_box('导出', '60%', '', '3', 'center', '');
+    html_start_box('立即执行', '60%', '', '3', 'center', '');
     print "<input type='hidden' name='traffic_settlement_id' value='" . $report_traffic_settlement['id'] . "'/>\n";
     print "<input type='hidden' name='action' value='do_traffic_settlement_import'/>\n";
     print "<table style='width:100%'>";
@@ -443,7 +443,7 @@ function traffic_settlement_import(){
                 <td class='textArea' style='padding-left: 40px;padding-bottom: 15px;' class='odd'>
                     <div class='itemlist'>
                     起止日期<input type='text' name='traffic_settlement_import_begin_date' id='traffic_settlement_import_begin_date'/>-<input type='text' name='traffic_settlement_import_end_date' id='traffic_settlement_import_end_date'/>
-                    <input type='submit' id='submit' value='导出' role='button'>
+                    <input type='submit' id='submit' value='立即执行' role='button'>
                     <input type='button' onclick='window.location.href=\"report.php?action=traffic_settlement\"' value='返回' role='button'>
                     </div>
                 </td>
