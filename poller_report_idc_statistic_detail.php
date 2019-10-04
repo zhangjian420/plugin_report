@@ -59,13 +59,13 @@ foreach($report_idc_statistic_array as $report_idc_statistic) {
                                         $traffic_out=array(0,0,0,0,0,0);
                                         foreach ($xport_array["data"] as $data){
                                             $datas = array_values($data);
-                                            if(cacti_sizeof($datas)>=8){
+                                            if(cacti_sizeof($datas)>=2){
                                                 // $traffic_in[]=getUnitVal($datas[0]);//统计所有项目配置时候使用
                                                 // $traffic_out[]=getUnitVal($datas[2]);
                                                 // $traffic_in[]=getUnitVal($datas[4]);
                                                 // $traffic_out[]=getUnitVal($datas[6]);
-                                                $traffic_in[]=getUnitVal($datas[5]);
-                                                $traffic_out[]=getUnitVal($datas[7]);
+                                                $traffic_in[]=getUnitVal($datas[sizeof($datas)-2]);
+                                                $traffic_out[]=getUnitVal(end($datas));
                                             }
                                         }
                                         rsort($traffic_in);//降序操作

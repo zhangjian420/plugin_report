@@ -1,5 +1,5 @@
 <?php
-$channel_utilization_actions = array(
+$channel_utilization_actions= array(
     31 => __('删除'),
     32 => __('下载'),
     33 => __('立即执行')

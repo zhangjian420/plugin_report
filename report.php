@@ -103,7 +103,7 @@ function ajax_tree(){
  */
 function form_actions() {
 	global $config;
-    global $traffic_settlement_actions,$idc_statistic_actions;
+    global $traffic_settlement_actions,$idc_statistic_actions,$channel_utilization_actions;
     /* ================= input validation ================= */
     get_filter_request_var('drp_action', FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => '/^([a-zA-Z0-9_]+)$/')));
 	/**********************流量结算管理操作begin***********************/

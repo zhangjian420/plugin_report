@@ -110,7 +110,7 @@ function get_idc_peak_value($local_data_id, $start_time, $end_time){
  * 返回的格式： 单位是G
  */
 function getUnitVal($val){
-    $val = round($val / 1000000000,10);
+    $val = round($val / 1000000000,2);
     return $val;
 }
 /**
@@ -445,7 +445,7 @@ function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement
     $excel_name=$excel_name . ('流量结算统计报表(' . $data_begin_date . '至' . $data_end_date . ')');
     $excel_type=$traffic_settlement_type;//excel类型
     $report_traffic_settlement_excel= db_fetch_row_prepared("SELECT * FROM plugin_report_traffic_settlement_excel WHERE report_traffic_settlement_id=" . $report_traffic_settlement_id . " and excel_name = '" . $excel_name . "' and excel_type = '" . $excel_type . "'");
-    if(isset($report_traffic_settlement_excel['id'])&&$report_traffic_settlement_excel['excel_type']!='手动统计'){//数据库中已经存在记录
+    if(isset($report_traffic_settlement_excel['id'])&&$report_traffic_settlement_excel['excel_type']!='手工统计'){//数据库中已经存在记录
        return;
     }
     $extension=json_decode($report_traffic_settlement['extension'],true);//将json字符串转为对象
