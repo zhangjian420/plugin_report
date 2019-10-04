@@ -34,22 +34,78 @@ foreach($report_idc_statistic_array as $report_idc_statistic) {
                             if($report_idc_statistic_detail_id==''){//IDC详细记录为空
                                 $local_graph_id=$secondtData['local_graph_id'];//图形ID
                                 $local_data=get_local_data($secondtData['local_graph_id']);//根据图形ID查找数据源ID
-                                $local_data_id = $local_data['local_data_id'];//根据图形ID查找数据源ID
-                                $idc_peak_value=get_idc_peak_value($local_data_id, strtotime($data_date . " 00:00:00"), strtotime($data_date . " 23:59:59"));
+                                $local_data_id=0;
                                 //出口top6
-                                $first_data_max_out=array_shift($idc_peak_value['traffic_out']);
-                                $second_data_max_out=array_shift($idc_peak_value['traffic_out']);
-                                $three_data_max_out=array_shift($idc_peak_value['traffic_out']);
-                                $fourth_data_max_out=array_shift($idc_peak_value['traffic_out']);
-                                $five_data_max_out=array_shift($idc_peak_value['traffic_out']);
-                                $six_data_max_out=array_shift($idc_peak_value['traffic_out']);
+                                $first_data_max_out=0;
+                                $second_data_max_out=0;
+                                $three_data_max_out=0;
+                                $fourth_data_max_out=0;
+                                $five_data_max_out=0;
+                                $six_data_max_out=0;
                                 //进口top6
-                                $first_data_max_in=array_shift($idc_peak_value['traffic_in']);
-                                $second_data_max_in=array_shift($idc_peak_value['traffic_in']);
-                                $three_data_max_in=array_shift($idc_peak_value['traffic_in']);
-                                $fourth_data_max_in=array_shift($idc_peak_value['traffic_in']);
-                                $five_data_max_in=array_shift($idc_peak_value['traffic_in']);
-                                $six_data_max_in=array_shift($idc_peak_value['traffic_in']);
+                                $first_data_max_in=0;
+                                $second_data_max_in=0;
+                                $three_data_max_in=0;
+                                $fourth_data_max_in=0;
+                                $five_data_max_in=0;
+                                $six_data_max_in=0;
+                                if(empty($local_data)){ //说明是聚合图形
+                                    $graph_data_array = array("graph_start"=>strtotime($data_date . " 00:00:00"),"graph_end"=>strtotime($data_date . " 23:59:59"),"export_csv"=>true);
+                                    $xport_meta = array();
+                                    $xport_array = rrdtool_function_xport($local_graph_id, 0, $graph_data_array, $xport_meta);
+                                    //cacti_log("xport_array=". json_encode($xport_array));
+                                    if (!empty($xport_array["data"])) {
+                                        $traffic_in=array(0,0,0,0,0,0);
+                                        $traffic_out=array(0,0,0,0,0,0);
+                                        foreach ($xport_array["data"] as $data){
+                                            $datas = array_values($data);
+                                            if(cacti_sizeof($datas)>=8){
+                                                // $traffic_in[]=getUnitVal($datas[0]);//统计所有项目配置时候使用
+                                                // $traffic_out[]=getUnitVal($datas[2]);
+                                                // $traffic_in[]=getUnitVal($datas[4]);
+                                                // $traffic_out[]=getUnitVal($datas[6]);
+                                                $traffic_in[]=getUnitVal($datas[5]);
+                                                $traffic_out[]=getUnitVal($datas[7]);
+                                            }
+                                        }
+                                        rsort($traffic_in);//降序操作
+                                        rsort($traffic_out);//降序操作
+                                        //出口top6
+                                        $first_data_max_out=array_shift($traffic_out);
+                                        $second_data_max_out=array_shift($traffic_out);
+                                        $three_data_max_out=array_shift($traffic_out);
+                                        $fourth_data_max_out=array_shift($traffic_out);
+                                        $five_data_max_out=array_shift($traffic_out);
+                                        $six_data_max_out=array_shift($traffic_out);
+                                        //进口top6
+                                        $first_data_max_in=array_shift($traffic_in);
+                                        $second_data_max_in=array_shift($traffic_in);
+                                        $three_data_max_in=array_shift($traffic_in);
+                                        $fourth_data_max_in=array_shift($traffic_in);
+                                        $five_data_max_in=array_shift($traffic_in);
+                                        $six_data_max_in=array_shift($traffic_in);
+                                    }
+                                    //cacti_log("聚合图形upper_limit=". json_encode($upper_limit));
+                                    //cacti_log("聚合图形data_max_out=". json_encode($data_max_out));
+                                    //cacti_log("聚合图形data_max_in=". json_encode($data_max_in));
+                                }else{//普通图形
+                                    $local_data_id = $local_data['local_data_id'];//根据图形ID查找数据源ID
+                                    $idc_peak_value=get_idc_peak_value($local_data_id, strtotime($data_date . " 00:00:00"), strtotime($data_date . " 23:59:59"));
+                                    //出口top6
+                                    $first_data_max_out=array_shift($idc_peak_value['traffic_out']);
+                                    $second_data_max_out=array_shift($idc_peak_value['traffic_out']);
+                                    $three_data_max_out=array_shift($idc_peak_value['traffic_out']);
+                                    $fourth_data_max_out=array_shift($idc_peak_value['traffic_out']);
+                                    $five_data_max_out=array_shift($idc_peak_value['traffic_out']);
+                                    $six_data_max_out=array_shift($idc_peak_value['traffic_out']);
+                                    //进口top6
+                                    $first_data_max_in=array_shift($idc_peak_value['traffic_in']);
+                                    $second_data_max_in=array_shift($idc_peak_value['traffic_in']);
+                                    $three_data_max_in=array_shift($idc_peak_value['traffic_in']);
+                                    $fourth_data_max_in=array_shift($idc_peak_value['traffic_in']);
+                                    $five_data_max_in=array_shift($idc_peak_value['traffic_in']);
+                                    $six_data_max_in=array_shift($idc_peak_value['traffic_in']);
+                                }
                                 //拼装保存数据
                                 $report_idc_statistic_detail=array();//一定要空
                                 $report_idc_statistic_detail['report_idc_statistic_id']=$report_idc_statistic_id;

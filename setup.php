@@ -50,6 +50,7 @@ function report_show_tab() {
  * 面包屑
  */
 function report_draw_navigation_text ($nav) {
+    
     $nav['report:'] = array('title' => "报表管理", 'mapping' => '', 'url' => 'report.php', 'level' => '0');
     $nav['report.php:'] = array('title' => "流量结算统计", 'mapping' => 'report:', 'url' => 'report.php', 'level' => '1');
     
@@ -60,6 +61,10 @@ function report_draw_navigation_text ($nav) {
     $nav['report.php:idc_statistic'] = array('title' => "IDC统计", 'mapping' => 'report:', 'url' => 'report.php?action=idc_statistic', 'level' => '1');
     $nav['report.php:idc_statistic_edit'] = array('title' => "IDC统计编辑", 'mapping' => 'report:,report.php:idc_statistic', 'url' => 'report.php?action=idc_statistic_edit', 'level' => '2');
     $nav['report.php:idc_statistic_import'] = array('title' => "IDC统计导出", 'mapping' => 'report:,report.php:idc_statistic', 'url' => 'report.php?action=idc_statistic_import', 'level' => '2');
+
+    $nav['report.php:channel_utilization'] = array('title' => "宽带通道预警", 'mapping' => 'report:', 'url' => 'report.php?action=channel_utilization', 'level' => '1');
+    $nav['report.php:channel_utilization_edit'] = array('title' => "宽带通道预警编辑", 'mapping' => 'report:,report.php:channel_utilization', 'url' => 'report.php?action=channel_utilization_edit', 'level' => '2');
+    $nav['report.php:channel_utilization_import'] = array('title' => "宽带通道预警导出", 'mapping' => 'report:,report.php:channel_utilization', 'url' => 'report.php?action=channel_utilization_import', 'level' => '2');
 
     return $nav;
 }

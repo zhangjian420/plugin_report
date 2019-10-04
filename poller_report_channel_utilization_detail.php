@@ -4,14 +4,14 @@ chdir("../../");
 require("./include/cli_check.php");
 include_once($config['base_path'] . '/lib/rrd.php');
 include_once($config['base_path'] . '/plugins/report/report_functions.php');//报表管理公共函数文件
-cacti_log("<<<<<<<<<<<<<<<<流量结算统计详情时任务执行>>>>>>>>>>>>>>>> " . date('Y-m-d H:i:s', time()));
-$report_traffic_settlement_array = db_fetch_assoc("select * from plugin_report_traffic_settlement where status_detail!='已执行'");
+cacti_log("<<<<<<<<<<<<<<<<宽带通道预警详情时任务执行>>>>>>>>>>>>>>>> " . date('Y-m-d H:i:s', time()));
+$report_channel_utilization_array = db_fetch_assoc("select * from plugin_report_channel_utilization where status_detail!='已执行'");
 //遍历集合begin
-foreach($report_traffic_settlement_array as $report_traffic_settlement) {
-    $report_traffic_settlement_id=$report_traffic_settlement['id'];//流量结算ID
-    $begin_date=$report_traffic_settlement['begin_date'];//开始日期
+foreach($report_channel_utilization_array as $report_channel_utilization) {
+    $report_channel_utilization_id=$report_channel_utilization['id'];//宽带通道预警ID
+    $begin_date=$report_channel_utilization['begin_date'];//开始日期
     $current_date=date('Y-m-d', time());//今天
-    $extension=json_decode($report_traffic_settlement['extension'],true);//将json字符串转为对象
+    $extension=json_decode($report_channel_utilization['extension'],true);//将json字符串转为对象
     $datas_checked=$extension['datas_checked'];//报表配置data
     //第一层数据遍历begin
     foreach ($datas_checked as $firstData){//第一层地区数据
@@ -30,14 +30,16 @@ foreach($report_traffic_settlement_array as $report_traffic_settlement) {
                         }
                         //日期集合遍历begin
                         foreach ($date_array as $data_date){
-                            $traffic_settlement_detail_id = db_fetch_cell_prepared("select id from plugin_report_traffic_settlement_detail where report_traffic_settlement_id=" . $report_traffic_settlement_id . " and region_id=" . $region_id . " and city_id=" . $city_id . " and data_date='" . $data_date ."'");
-                            if($traffic_settlement_detail_id==''){//为空
+                            $channel_utilization_detail_id = db_fetch_cell_prepared("select id from plugin_report_channel_utilization_detail where report_channel_utilization_id=" . $report_channel_utilization_id . " and region_id=" . $region_id . " and city_id=" . $city_id . " and data_date='" . $data_date ."'");
+                            if($channel_utilization_detail_id==''){//为空
                                 $local_graph_id=$secondtData['local_graph_id'];//图形ID
                                 $local_data=get_local_data($secondtData['local_graph_id']);//根据图形ID查找数据源ID
                                 $local_data_id = 0;
                                 $upper_limit=0;
                                 $data_max_out=0;
                                 $data_max_in=0;
+                                $utilization_ratio_out=0;
+                                $utilization_ratio_in=0;
                                 if(empty($local_data)){ //说明是聚合图形
                                     $upper_limit = getUnitVal(db_fetch_cell_prepared("select upper_limit from graph_templates_graph where local_graph_id=" . $local_graph_id));
                                     $graph_data_array = array("graph_start"=>strtotime($data_date . " 00:00:00"),"graph_end"=>strtotime($data_date . " 23:59:59"),"export_csv"=>true);
@@ -60,8 +62,14 @@ foreach($report_traffic_settlement_array as $report_traffic_settlement) {
                                         }
                                         rsort($traffic_in);//降序操作
                                         rsort($traffic_out);//降序操作
+                                        //流量赋值
                                         $data_max_out=$traffic_out[0];
                                         $data_max_in=$traffic_in[0];
+                                        //流量利用率
+                                        if($upper_limit!=0){
+                                            $utilization_ratio_out= $data_max_out/$upper_limit;
+                                            $utilization_ratio_in= $data_max_in/$upper_limit;
+                                        }
                                     }
                                     //cacti_log("聚合图形upper_limit=". json_encode($upper_limit));
                                     //cacti_log("聚合图形data_max_out=". json_encode($data_max_out));
@@ -73,32 +81,36 @@ foreach($report_traffic_settlement_array as $report_traffic_settlement) {
                                     //流量赋值
                                     $data_max_out=$traffic_max_value['traffic_out'];
                                     $data_max_in=$traffic_max_value['traffic_in'];
-                                    //cacti_log("普通图形data_max_out=". json_encode($data_max_out));
-                                    //cacti_log("普通图形data_max_in=". json_encode($data_max_in));
-                                }
+                                    //流量利用率
+                                    if($upper_limit!=0){
+                                        $utilization_ratio_out= $data_max_out/$upper_limit;
+                                        $utilization_ratio_in= $data_max_in/$upper_limit;
+                                    }
+                                }                                
                                 //拼装保存数据
-                                $report_traffic_settlement_detail=array();//一定要空
-                                $report_traffic_settlement_detail['report_traffic_settlement_id']=$report_traffic_settlement_id;
-                                $report_traffic_settlement_detail['region_id']=$region_id;
-                                $report_traffic_settlement_detail['region_name']=$region_name;
-                                $report_traffic_settlement_detail['city_id']=$city_id;
-                                $report_traffic_settlement_detail['city_name']=$city_name;
-                                $report_traffic_settlement_detail['local_graph_id']=$local_graph_id;
-                                $report_traffic_settlement_detail['local_data_id']=$local_data_id;
-                                $report_traffic_settlement_detail['upper_limit']=$upper_limit;
-                                $report_traffic_settlement_detail['data_date']=$data_date;
-                                $report_traffic_settlement_detail['data_max_out']=$data_max_out;
-                                $report_traffic_settlement_detail['data_max_in']=$data_max_in;
-                                $report_traffic_settlement_detail['last_modified'] = date('Y-m-d H:i:s', time());
-                                //cacti_log("<<<<<<<<<<<<<<<<<<<report_traffic_settlement_detail>>>>>>>>>>>>>>>>>>>>>> " . json_encode($report_traffic_settlement_detail));
-                                $id=sql_save($report_traffic_settlement_detail, 'plugin_report_traffic_settlement_detail');
+                                $report_channel_utilization_detail=array();//一定要空
+                                $report_channel_utilization_detail['report_channel_utilization_id']=$report_channel_utilization_id;
+                                $report_channel_utilization_detail['region_id']=$region_id;
+                                $report_channel_utilization_detail['region_name']=$region_name;
+                                $report_channel_utilization_detail['city_id']=$city_id;
+                                $report_channel_utilization_detail['city_name']=$city_name;
+                                $report_channel_utilization_detail['local_graph_id']=$local_graph_id;
+                                $report_channel_utilization_detail['local_data_id']=$local_data_id;
+                                $report_channel_utilization_detail['upper_limit']=$upper_limit;
+                                $report_channel_utilization_detail['data_date']=$data_date;
+                                $report_channel_utilization_detail['data_max_out']=$data_max_out;
+                                $report_channel_utilization_detail['utilization_ratio_out']=$utilization_ratio_out;
+                                $report_channel_utilization_detail['data_max_in']=$data_max_in;
+                                $report_channel_utilization_detail['utilization_ratio_in']=$utilization_ratio_in;
+                                $report_channel_utilization_detail['last_modified'] = date('Y-m-d H:i:s', time());
+                                //cacti_log("<<<<<<<<<<<<<<<<<<<report_channel_utilization_detail>>>>>>>>>>>>>>>>>>>>>> " . json_encode($report_channel_utilization_detail));
+                                $id=sql_save($report_channel_utilization_detail, 'plugin_report_channel_utilization_detail');
                                 //报表状态更新
-                                $save_report_traffic_settlement=array();//一定要空
-                                $save_report_traffic_settlement['id']=$report_traffic_settlement_id;
-                                $save_report_traffic_settlement['status_detail']='执行中';
-                                $save_report_traffic_settlement['last_modified'] = date('Y-m-d H:i:s', time());
-                                $id=sql_save($save_report_traffic_settlement, 'plugin_report_traffic_settlement');
-
+                                $save_report_channel_utilization=array();//一定要空
+                                $save_report_channel_utilization['id']=$report_channel_utilization_id;
+                                $save_report_channel_utilization['status_detail']='执行中';
+                                $save_report_channel_utilization['last_modified'] = date('Y-m-d H:i:s', time());
+                                $id=sql_save($save_report_channel_utilization, 'plugin_report_channel_utilization');
                             }
                         }
                         //日期集合遍历end

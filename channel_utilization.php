@@ -1,19 +1,19 @@
 <?php
-$traffic_settlement_actions = array(
-    11 => __('删除'),
-    12 => __('下载'),
-    13 => __('立即执行')
+$channel_utilization_actions = array(
+    31 => __('删除'),
+    32 => __('下载'),
+    33 => __('立即执行')
 );
-//流量结算统计新增编辑页面
-function traffic_settlement_edit(){
-    report_tabs('traffic_settlement');//流量结算统计管理选项卡
+//宽带通道预警新增编辑页面
+function channel_utilization_edit(){
+    report_tabs('channel_utilization');//宽带通道预警管理选项卡
     $data = array();//页面显示data
     if (!isempty_request_var('id')) {
-        $data= db_fetch_row_prepared('SELECT * FROM plugin_report_traffic_settlement WHERE id = ?', array(get_request_var('id')));
+        $data= db_fetch_row_prepared('SELECT * FROM plugin_report_channel_utilization WHERE id = ?', array(get_request_var('id')));
     }
 	$field_array = array(
 		'id' => array(
-			'friendly_name' => '流量结算统计id',
+			'friendly_name' => '宽带通道预警id',
 			'method' => 'hidden',
 			'value' => isset_request_var('id') ? get_request_var('id'):0
         ),
@@ -23,12 +23,21 @@ function traffic_settlement_edit(){
 			'value' => (isset($data['status_detail']) ? $data['status_detail']:'未执行')
 		),
 		'name' => array(
-			'friendly_name' => '流量结算统计名称',
+			'friendly_name' => '宽带通道预警名称',
 			'method' => 'textbox',
 			'max_length' => 100,
-			'description' =>'请正确填写流量结算统计名称',
+			'description' =>'请正确填写宽带通道预警名称',
 			'value' => (isset($data['name']) ? $data['name']:'')
-		),
+        ),
+        'utilization_ratio_threshold' => array(
+			'friendly_name' => '宽带通道利用率阈值',
+			'method' => 'drop_sql',
+			'description' => '请选择宽带通道利用率阈值',
+			'value' => isset($data['utilization_ratio_threshold']) ? $data['utilization_ratio_threshold'] : '0',
+            'none_value' =>'请选择',
+			'default' => '0',
+			'sql' => "SELECT value as id , name as name FROM plugin_report_dictionary where type_code='channel_utilization_utilization_ratio_threshold'"
+        ),
         'is_day' => array(
 			'friendly_name' => __('日统计'),
 			'method' => 'checkbox',
@@ -39,7 +48,7 @@ function traffic_settlement_edit(){
         'notification_id_day' => array(
 			'friendly_name' => '日统计邮箱',
 			'method' => 'drop_sql',
-			'description' => '请选择接收流量结算统计的日统计邮箱',
+			'description' => '请选择接收宽带通道预警的日统计邮箱',
 			'value' => isset($data['notification_id_day']) ? $data['notification_id_day'] : '0',
             'none_value' =>'请选择',
 			'default' => '0',
@@ -55,7 +64,7 @@ function traffic_settlement_edit(){
         'notification_id_week' => array(
 			'friendly_name' => '周统计邮箱',
 			'method' => 'drop_sql',
-			'description' => '请选择接收流量结算统计的周统计邮箱',
+			'description' => '请选择接收宽带通道预警的周统计邮箱',
 			'value' => isset($data['notification_id_week']) ? $data['notification_id_week'] : '0',
             'none_value' =>'请选择',
 			'default' => '0',
@@ -71,18 +80,18 @@ function traffic_settlement_edit(){
         'notification_id_month' => array(
 			'friendly_name' => '月统计邮箱',
 			'method' => 'drop_sql',
-			'description' => '请选择接收流量结算统计的月统计邮箱',
+			'description' => '请选择接收宽带通道预警的月统计邮箱',
 			'value' => isset($data['notification_id_month']) ? $data['notification_id_month'] : '0',
             'none_value' =>'请选择',
 			'default' => '0',
 			'sql' => 'SELECT id, name FROM plugin_notification_lists'
         ),
 		'description' => array(
-			'friendly_name' => '流量结算统计描述',
+			'friendly_name' => '宽带通道预警描述',
 			'method' => 'textarea',
             'textarea_rows' => '4',
 			'textarea_cols' => '80',
-			'description' =>'请正确填写流量结算统计描述',
+			'description' =>'请正确填写宽带通道预警描述',
 			'value' => (isset($data['description']) ? $data['description']:'')
         ),
         'graph_tree_id' => array(
@@ -100,11 +109,11 @@ function traffic_settlement_edit(){
 			'value' => isset($data['extension']) ? $data['extension'] : '',
 		)
 	);
-	form_start('report.php', 'traffic_settlement_edit',false);//流量结算统计编辑form开始
+	form_start('report.php', 'channel_utilization_edit',false);//宽带通道预警编辑form开始
 	if (isset($data['id'])) {
-		html_start_box(__('流量结算统计 [编辑: %s]', html_escape($data['name'])), '100%', true, '3', 'center', '');
+		html_start_box(__('宽带通道预警 [编辑: %s]', html_escape($data['name'])), '100%', true, '3', 'center', '');
 	} else {
-		html_start_box(__('流量结算统计 [新增]'), '100%', true, '3', 'center', '');
+		html_start_box(__('宽带通道预警 [新增]'), '100%', true, '3', 'center', '');
 	}
 	draw_edit_form(
 		array(
@@ -113,7 +122,7 @@ function traffic_settlement_edit(){
 		)
     );
     ?>
-    <div class="formRow even">
+    <div class="formRow odd">
         <div class="formColumnLeft">
             <div class="formFieldName">选择图形
                 <div class="formTooltip">
@@ -130,8 +139,8 @@ function traffic_settlement_edit(){
     <table style='width:100%;text-align:center;'>
 		<tr>
 			<td class='saveRow'>
-                <input type="hidden" name="action" value="traffic_settlement_save">
-                <input type="button" onclick="window.location.href='report.php?action=traffic_settlement';" value="返回" role="button">
+                <input type="hidden" name="action" value="channel_utilization_save">
+                <input type="button" onclick="window.location.href='report.php?action=channel_utilization';" value="返回" role="button">
                 <input type="submit" id="submit" value="保存" role="button">
 			</td>
 		</tr>
@@ -245,8 +254,8 @@ function traffic_settlement_edit(){
     html_end_box(true, true);
     form_end(false);//表单编辑结束
 }
-//流量结算统计信息修改操作
-function traffic_settlement_save(){
+//宽带通道预警信息修改操作
+function channel_utilization_save(){
     global $config;
     $save=array();
     $save['id'] = get_filter_request_var('id');
@@ -254,6 +263,7 @@ function traffic_settlement_save(){
         $save['begin_date'] = date('Y-m-01',time());
     }
     $save['name'] = form_input_validate(get_nfilter_request_var('name'), 'name', '', false, 3);
+    $save['utilization_ratio_threshold'] = form_input_validate(get_nfilter_request_var('utilization_ratio_threshold'), 'utilization_ratio_threshold', '', true, 3);
     $save['is_day'] = (isset_request_var('is_day') ? 'on':'');
     $save['notification_id_day'] = form_input_validate(get_nfilter_request_var('notification_id_day'), 'notification_id_day', '', true, 3);
     $save['is_week'] = (isset_request_var('is_week') ? 'on':'');
@@ -266,27 +276,27 @@ function traffic_settlement_save(){
     $save['last_modified'] = date('Y-m-d H:i:s', time());
     $save['modified_by'] = $_SESSION['sess_user_id'];
     if (is_error_message()) {
-        header('Location: report.php?action=traffic_settlement_edit&id=' . (empty($id) ? get_nfilter_request_var('id') : $id));
+        header('Location: report.php?action=channel_utilization_edit&id=' . (empty($id) ? get_nfilter_request_var('id') : $id));
 		exit;
 	}else{
-        $id=sql_save($save, 'plugin_report_traffic_settlement');
+        $id=sql_save($save, 'plugin_report_channel_utilization');
         if ($id) {
             raise_message(1);
-            header('Location: report.php?action=traffic_settlement');
+            header('Location: report.php?action=channel_utilization');
             exit;
         } else {
             raise_message(2);
-            header('Location: report.php?action=traffic_settlement_edit&id=' . (empty($id) ? get_nfilter_request_var('id') : $id));
+            header('Location: report.php?action=channel_utilization_edit&id=' . (empty($id) ? get_nfilter_request_var('id') : $id));
             exit;
         }
     }
 }
 /**
- * 流量结算统计入口
+ * 宽带通道预警入口
  */
-function traffic_settlement(){
+function channel_utilization(){
     global $config;
-    global $traffic_settlement_actions,$item_rows;
+    global $channel_utilization_actions,$item_rows;
     /* ================= input validation and session storage ================= */
     $filters = array(
         'rows' => array(
@@ -315,7 +325,7 @@ function traffic_settlement(){
             'options' => array('options' => 'sanitize_search_string')
         )
     );
-    validate_store_request_vars($filters, 'sess_traffic_settlement');//
+    validate_store_request_vars($filters, 'sess_channel_utilization');//
     /* ================= input validation ================= */
     /* if the number of rows is -1, set it to the default */
     if (get_request_var('rows') == -1) {
@@ -323,11 +333,11 @@ function traffic_settlement(){
     } else {
         $rows = get_request_var('rows');
     }
-    html_start_box("新增流量结算统计", '100%', '', '3', 'center', 'report.php?action=traffic_settlement_edit');
+    html_start_box("新增宽带通道预警", '100%', '', '3', 'center', 'report.php?action=channel_utilization_edit');
     ?>
     <tr class='even'>
         <td>
-            <form id='form_traffic_settlement' action='report.php?action=traffic_settlement'>
+            <form id='form_channel_utilization' action='report.php?action=channel_utilization'>
                 <table class='filterTable'>
                     <tr>
                         <td>
@@ -337,7 +347,7 @@ function traffic_settlement(){
                             <input type='text' class='ui-state-default ui-corner-all' id='filter' size='25' value='<?php print html_escape_request_var('filter');?>'>
                         </td>
                         <td>
-                            流量结算统计记录
+                            宽带通道预警记录
                         </td>
                         <td>
                             <select id='rows' onChange='applyFilter()'>
@@ -363,14 +373,14 @@ function traffic_settlement(){
             <script type='text/javascript'>
                 //查询操作函数
                 function applyFilter() {
-                    strURL  = 'report.php?action=traffic_settlement&header=false';
+                    strURL  = 'report.php?action=channel_utilization&header=false';
                     strURL += '&filter='+$('#filter').val();
                     strURL += '&rows='+$('#rows').val();
                     loadPageNoHeader(strURL);
                 }
                 //重置查询函数
                 function clearFilter() {
-                    strURL = 'report.php?action=traffic_settlement&clear=1&header=false';
+                    strURL = 'report.php?action=channel_utilization&clear=1&header=false';
                     loadPageNoHeader(strURL);
                 }
                 $(function() {
@@ -380,7 +390,7 @@ function traffic_settlement(){
                     $('#clear').click(function() {
                         clearFilter();
                     });
-                    $('#form_traffic_settlement').submit(function(event) {
+                    $('#form_channel_utilization').submit(function(event) {
                         event.preventDefault();
                         applyFilter();
                     });
@@ -395,13 +405,13 @@ function traffic_settlement(){
     if (get_request_var('filter') != '') {
         $sql_where =$sql_where . " AND (name LIKE '%" . get_request_var('filter') . "%')";
     }
-    $total_rows = db_fetch_cell("SELECT COUNT(*) FROM plugin_report_traffic_settlement WHERE 1=1 $sql_where");
+    $total_rows = db_fetch_cell("SELECT COUNT(*) FROM plugin_report_channel_utilization WHERE 1=1 $sql_where");
     $sql_order = get_order_string();
     $sql_limit = ' LIMIT ' . ($rows*(get_request_var('page')-1)) . ',' . $rows;
-    $traffic_settlement_list = db_fetch_assoc("SELECT * FROM plugin_report_traffic_settlement WHERE 1=1 $sql_where $sql_order $sql_limit");
-    cacti_log("SELECT * FROM plugin_report_traffic_settlement WHERE 1=1 " . $sql_where . $sql_order . $sql_limit);
-    $nav = html_nav_bar('report.php?action=traffic_settlement&filter=' . get_request_var('filter'), MAX_DISPLAY_PAGES, get_request_var('page'), $rows, $total_rows, 5, "流量结算统计", 'page', 'main');
-    form_start('report.php?action=traffic_settlement', 'chk');//分页表单开始
+    $channel_utilization_list = db_fetch_assoc("SELECT * FROM plugin_report_channel_utilization WHERE 1=1 $sql_where $sql_order $sql_limit");
+    cacti_log("SELECT * FROM plugin_report_channel_utilization WHERE 1=1 " . $sql_where . $sql_order . $sql_limit);
+    $nav = html_nav_bar('report.php?action=channel_utilization&filter=' . get_request_var('filter'), MAX_DISPLAY_PAGES, get_request_var('page'), $rows, $total_rows, 5, "宽带通道预警", 'page', 'main');
+    form_start('report.php?action=channel_utilization', 'chk');//分页表单开始
     print $nav;
     html_start_box('', '100%', '', '3', 'center', '');
     $display_text = array(
@@ -412,51 +422,51 @@ function traffic_settlement(){
         'last_modified' => array('display' => __('Last Edited'), 'align' => 'left', 'sort' => 'ASC', 'tip' => "最后编辑时间"),
         'modified_by'    => array('display' => "编辑人", 'align' => 'left',  'sort' => 'ASC', 'tip' => "编辑人")
     );
-    html_header_sort_checkbox($display_text, get_request_var('sort_column'), get_request_var('sort_direction'), false,'report.php?action=traffic_settlement');
-    if (cacti_sizeof($traffic_settlement_list)) {
-        foreach ($traffic_settlement_list as $traffic_settlement) {
-            form_alternate_row('line' . $traffic_settlement['id'], true);
-            form_selectable_cell($traffic_settlement['id'], $traffic_settlement['id'], '');
-            form_selectable_cell(filter_value($traffic_settlement['name'], get_request_var('filter'), 'report.php?action=traffic_settlement_edit&id=' . $traffic_settlement['id']) , $traffic_settlement['id']);
-            form_selectable_cell($traffic_settlement['description'],$traffic_settlement['id'],'');
-            form_selectable_cell($traffic_settlement['status_detail'],$traffic_settlement['id'],'');
-            form_selectable_cell(substr($traffic_settlement['last_modified'],0,16), $traffic_settlement['id'], '');
-            form_selectable_cell(get_username($traffic_settlement['modified_by']),$traffic_settlement['id'],'');
-            form_checkbox_cell($traffic_settlement['name'], $traffic_settlement['id']);
+    html_header_sort_checkbox($display_text, get_request_var('sort_column'), get_request_var('sort_direction'), false,'report.php?action=channel_utilization');
+    if (cacti_sizeof($channel_utilization_list)) {
+        foreach ($channel_utilization_list as $channel_utilization) {
+            form_alternate_row('line' . $channel_utilization['id'], true);
+            form_selectable_cell($channel_utilization['id'], $channel_utilization['id'], '');
+            form_selectable_cell(filter_value($channel_utilization['name'], get_request_var('filter'), 'report.php?action=channel_utilization_edit&id=' . $channel_utilization['id']) , $channel_utilization['id']);
+            form_selectable_cell($channel_utilization['description'],$channel_utilization['id'],'');
+            form_selectable_cell($channel_utilization['status_detail'],$channel_utilization['id'],'');
+            form_selectable_cell(substr($channel_utilization['last_modified'],0,16), $channel_utilization['id'], '');
+            form_selectable_cell(get_username($channel_utilization['modified_by']),$channel_utilization['id'],'');
+            form_checkbox_cell($channel_utilization['name'], $channel_utilization['id']);
             form_end_row();
         }
     } else {
         print "<tr class='tableRow'><td colspan='" . (cacti_sizeof($display_text)+1) . "'><em>" . "没有数据" . "</em></td></tr>\n";
     }
     html_end_box(false);//与谁对应
-    if (cacti_sizeof($traffic_settlement_list)) {
+    if (cacti_sizeof($channel_utilization_list)) {
         print $nav;
     }
-    draw_actions_dropdown($traffic_settlement_actions);
+    draw_actions_dropdown($channel_utilization_actions);
     form_end();//分页form结束
 }
 //统计导出页面
-function traffic_settlement_import(){
+function channel_utilization_import(){
     global $config;
-    $traffic_settlement_id=get_request_var('traffic_settlement_id');
-    $report_traffic_settlement= db_fetch_row_prepared('SELECT * FROM plugin_report_traffic_settlement WHERE id = ?', array($traffic_settlement_id));
-    $report_traffic_settlement_excel_array= db_fetch_assoc("SELECT * FROM plugin_report_traffic_settlement_excel WHERE  excel_type='手工统计' and report_traffic_settlement_id = ". $traffic_settlement_id . " order by last_modified desc limit 10");
+    $channel_utilization_id=get_request_var('channel_utilization_id');
+    $report_channel_utilization= db_fetch_row_prepared('SELECT * FROM plugin_report_channel_utilization WHERE id = ?', array($channel_utilization_id));
+    $report_channel_utilization_excel_array= db_fetch_assoc("SELECT * FROM plugin_report_channel_utilization_excel WHERE  excel_type='手工统计' and report_channel_utilization_id = ". $channel_utilization_id . " order by last_modified desc limit 10");
     form_start('report.php');
     html_start_box('立即执行', '60%', '', '3', 'center', '');
-    print "<input type='hidden' name='traffic_settlement_id' value='" . $report_traffic_settlement['id'] . "'/>\n";
-    print "<input type='hidden' name='action' value='do_traffic_settlement_import'/>\n";
+    print "<input type='hidden' name='channel_utilization_id' value='" . $report_channel_utilization['id'] . "'/>\n";
+    print "<input type='hidden' name='action' value='do_channel_utilization_import'/>\n";
     print "<table style='width:100%'>";
     print "<tr>
                 <td class='textArea' style='padding-left: 40px;padding-top: 15px;padding-bottom: 15px;' class='odd'>
-                    <div class='itemlist'>[" . $report_traffic_settlement['name'] . "]有效日期范围(" . $report_traffic_settlement['begin_date'] . "至" . date('Y-m-d',(strtotime(date('Y-m-d', time()))-86400)) . ")</div>
+                    <div class='itemlist'>[" . $report_channel_utilization['name'] . "]有效日期范围(" . $report_channel_utilization['begin_date'] . "至" . date('Y-m-d',(strtotime(date('Y-m-d', time()))-86400)) . ")</div>
                 </td>
             </tr>\n";
     print "<tr>
                 <td class='textArea' style='padding-left: 40px;padding-bottom: 15px;' class='odd'>
                     <div class='itemlist'>
-                    起止日期<input type='text' name='traffic_settlement_import_begin_date' id='traffic_settlement_import_begin_date'/>-<input type='text' name='traffic_settlement_import_end_date' id='traffic_settlement_import_end_date'/>
+                    起止日期<input type='text' name='channel_utilization_import_begin_date' id='channel_utilization_import_begin_date'/>-<input type='text' name='channel_utilization_import_end_date' id='channel_utilization_import_end_date'/>
                     <input type='submit' id='submit' value='立即执行' role='button'>
-                    <input type='button' onclick='window.location.href=\"report.php?action=traffic_settlement\"' value='返回' role='button'>
+                    <input type='button' onclick='window.location.href=\"report.php?action=channel_utilization\"' value='返回' role='button'>
                     </div>
                 </td>
            </tr>\n";
@@ -465,17 +475,17 @@ function traffic_settlement_import(){
                     <h3>最近10条导出记录</h3>
                 </td>
            </tr>\n";
-    if(cacti_count($report_traffic_settlement_excel_array)==0){
+    if(cacti_count($report_channel_utilization_excel_array)==0){
         print "<tr>
                     <td class='textArea' style='padding-left: 40px;padding-bottom: 15px;' class='odd'>
                         <div class='itemlist'>暂无记录</div>
                     </td>
                </tr>\n";
     }else{
-        foreach ($report_traffic_settlement_excel_array as $report_traffic_settlement_excel){
+        foreach ($report_channel_utilization_excel_array as $report_channel_utilization_excel){
             print "<tr>
                         <td class='textArea' style='padding-left: 40px;padding-bottom: 15px;' class='odd'>
-                            <div class='itemlist'><a target='_blank' href='" . $config['url_path'] . $report_traffic_settlement_excel['excel_path'] . "' download='" . $report_traffic_settlement_excel['excel_name'] . "'>" . html_escape($report_traffic_settlement_excel['excel_name']) . "</a><div>
+                            <div class='itemlist'><a target='_blank' href='" . $config['url_path'] . $report_channel_utilization_excel['excel_path'] . "' download='" . $report_channel_utilization_excel['excel_name'] . "'>" . html_escape($report_channel_utilization_excel['excel_name']) . "</a><div>
                         </td>
                    </tr>\n";
                 
@@ -485,14 +495,14 @@ function traffic_settlement_import(){
     ?>
     <script>
         $(document).ready(function(){
-                $("#traffic_settlement_import_begin_date").prop("readonly", true).datepicker({
+                $("#channel_utilization_import_begin_date").prop("readonly", true).datepicker({
                     changeMonth: false,
                     dateFormat: "yy-mm-dd",
                     onClose: function(selectedDate) {
 
                     }
                 });
-                $("#traffic_settlement_import_end_date").prop("readonly", true).datepicker({
+                $("#channel_utilization_import_end_date").prop("readonly", true).datepicker({
                     changeMonth: false,
                     dateFormat: "yy-mm-dd",
                     onClose: function(selectedDate) {
@@ -505,33 +515,33 @@ function traffic_settlement_import(){
     form_end();//表单编辑结束
 }
 //执行手动导出操作
-function do_traffic_settlement_import(){
+function do_channel_utilization_import(){
     global $config;
-    $traffic_settlement_id = get_filter_request_var('traffic_settlement_id');
-    $traffic_settlement_import_begin_date = form_input_validate(get_nfilter_request_var('traffic_settlement_import_begin_date'), 'traffic_settlement_import_begin_date', '', true, 3);
-    $traffic_settlement_import_end_date = form_input_validate(get_nfilter_request_var('traffic_settlement_import_end_date'), 'traffic_settlement_import_end_date', '', true, 3);
-    $report_traffic_settlement= db_fetch_row_prepared('SELECT * FROM plugin_report_traffic_settlement WHERE id = ?', array($traffic_settlement_id));
+    $channel_utilization_id = get_filter_request_var('channel_utilization_id');
+    $channel_utilization_import_begin_date = form_input_validate(get_nfilter_request_var('channel_utilization_import_begin_date'), 'channel_utilization_import_begin_date', '', true, 3);
+    $channel_utilization_import_end_date = form_input_validate(get_nfilter_request_var('channel_utilization_import_end_date'), 'channel_utilization_import_end_date', '', true, 3);
+    $report_channel_utilization= db_fetch_row_prepared('SELECT * FROM plugin_report_channel_utilization WHERE id = ?', array($channel_utilization_id));
     $current_date=date('Y-m-d', time());//今天
-    if ($traffic_settlement_import_begin_date=='') {
+    if ($channel_utilization_import_begin_date=='') {
         raise_message(2,"开始日期不能为空",MESSAGE_LEVEL_ERROR);
     }
-    else if($traffic_settlement_import_end_date==''){
+    else if($channel_utilization_import_end_date==''){
         raise_message(2,"结束日期不能为空",MESSAGE_LEVEL_ERROR);
     }
-    else if(strtotime($traffic_settlement_import_begin_date)<strtotime($report_traffic_settlement['begin_date'])){
-        raise_message(2,"开始日期不能小于".$report_traffic_settlement['begin_date'],MESSAGE_LEVEL_ERROR);
+    else if(strtotime($channel_utilization_import_begin_date)<strtotime($report_channel_utilization['begin_date'])){
+        raise_message(2,"开始日期不能小于".$report_channel_utilization['begin_date'],MESSAGE_LEVEL_ERROR);
     }
-    else if(strtotime($traffic_settlement_import_end_date)>=strtotime($current_date)){
+    else if(strtotime($channel_utilization_import_end_date)>=strtotime($current_date)){
         raise_message(2,"结束日期不能大于等于".$current_date,MESSAGE_LEVEL_ERROR);
     }
-    else if(strtotime($traffic_settlement_import_end_date)<strtotime($traffic_settlement_import_begin_date)){
+    else if(strtotime($channel_utilization_import_end_date)<strtotime($channel_utilization_import_begin_date)){
         raise_message(2,"结束日期不能小于开始日期",MESSAGE_LEVEL_ERROR);
     }
     else{
-        $data_begin_date=$traffic_settlement_import_begin_date;
-        $data_end_date=$traffic_settlement_import_end_date;
-        traffic_settlement_excel($report_traffic_settlement,'手工统计',$data_begin_date,$data_end_date);
+        $data_begin_date=$channel_utilization_import_begin_date;
+        $data_end_date=$channel_utilization_import_end_date;
+        channel_utilization_excel($report_channel_utilization,'手工统计',$data_begin_date,$data_end_date);
     }
-    header('Location: report.php?action=traffic_settlement_import&traffic_settlement_id=' . (empty($traffic_settlement_id) ? get_nfilter_request_var('traffic_settlement_id') : $traffic_settlement_id));
+    header('Location: report.php?action=channel_utilization_import&channel_utilization_id=' . (empty($channel_utilization_id) ? get_nfilter_request_var('channel_utilization_id') : $channel_utilization_id));
 	exit;
 }

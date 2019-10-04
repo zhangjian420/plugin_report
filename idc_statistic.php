@@ -145,6 +145,7 @@ function idc_statistic_edit(){
             </div>
         </div>
         <div class="formColumnRight">
+            <input type="button" value="全选" id="selectAll"/>
             <div id="tree" systle="padding-left: 0px"></div>
         </div>
     </div>
@@ -196,7 +197,11 @@ function idc_statistic_edit(){
                             dataType: "json",
                             success: function (data) {
                                 tree_data=data;
-                                console.dir(tree_data);
+                                if(tree_data.length==0){
+                                    $("#selectAll").hide();
+                                }else{
+                                    $("#selectAll").show();
+                                }
                                 callback.call(this, tree_data);
                             }
                         })
@@ -251,6 +256,12 @@ function idc_statistic_edit(){
                 return true;
             });  
             //提交按钮验证end
+            //全选按钮事件
+            $("#selectAll").click(function(){
+                var tree = $('#tree').jstree(true);//获取整个树
+                tree.check_all();//选择所有
+            });
+            //全选按钮事件
 		});
 	</script>
     <?php

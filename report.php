@@ -6,8 +6,9 @@ include_once('./include/auth.php');
 include_once($config['base_path'] . '/lib/rrd.php');
 include_once($config['base_path'] . '/plugins/report/phpexcel/PHPExcel.php');//PHPExcel函数文件
 include_once($config['base_path'] . '/plugins/report/report_functions.php');//报表管理公共函数文件
-include_once($config['base_path'] . '/plugins/report/idc_statistic.php');//IDC统计
 include_once($config['base_path'] . '/plugins/report/traffic_settlement.php');//流量结算统计
+include_once($config['base_path'] . '/plugins/report/idc_statistic.php');//IDC统计
+include_once($config['base_path'] . '/plugins/report/channel_utilization.php');//宽带通道预警
 switch(get_request_var('action')) {
 	case 'ajax_tree'://ajax得到tree请求数据
         ajax_tree();
@@ -40,13 +41,19 @@ switch(get_request_var('action')) {
 	case 'idc_statistic_save'://IDC统计保存
 		idc_statistic_save();
 		break;
-	case 'idc_statistic_import'://IDC统计导出
+	case 'channel_utilization'://宽带通道预警
 		general_header();
-		idc_statistic_import();
+		report_tabs('channel_utilization');
+		channel_utilization();
 		bottom_footer();
 		break;
-	case 'do_idc_statistic_import'://执行IDC统计导出
-		do_idc_statistic_import();
+	case 'channel_utilization_edit'://宽带通道预警编辑页面
+		general_header();
+		channel_utilization_edit();
+		bottom_footer();
+		break;
+	case 'channel_utilization_save'://宽带通道预警保存
+		channel_utilization_save();
 		break;
 	case 'traffic_settlement_import'://流量结算统计导出
 		general_header();
@@ -55,6 +62,22 @@ switch(get_request_var('action')) {
 		break;
 	case 'do_traffic_settlement_import'://执行流量结算统计导出
 		do_traffic_settlement_import();
+		break;
+	case 'idc_statistic_import'://IDC统计导出
+		general_header();
+		idc_statistic_import();
+		bottom_footer();
+		break;
+	case 'do_idc_statistic_import'://执行IDC统计导出
+		do_idc_statistic_import();
+		break;
+	case 'channel_utilization_import'://宽带通道预警导出
+		general_header();
+		channel_utilization_import();
+		bottom_footer();
+		break;
+	case 'do_channel_utilization_import'://执行宽带通道预警导出
+		do_channel_utilization_import();
 		break;
 	case 'actions':
 		form_actions();
@@ -270,34 +293,99 @@ function form_actions() {
 	}
 	/**********************IDC统计管理操作end***********************/
 
-	/***************************************IDC导出操作begin*************************************** */
-	if(get_nfilter_request_var('drp_action') == '23'){
-		$report_idc_statistic_id_list = ''; $i = 0;
+	/**********************宽带通道预警管理操作begin***********************/
+	if(get_nfilter_request_var('drp_action') == '31'||get_nfilter_request_var('drp_action') == '32'){
+		//宽带通道预警删除操作begin
+		if (isset_request_var('selected_items')) {
+			$selected_items = sanitize_unserialize_selected_items(get_nfilter_request_var('selected_items'));
+			if ($selected_items != false) {
+				if (get_nfilter_request_var('drp_action') == '31') { /* delete */
+					//cacti_log('DELETE FROM plugin_report_channel_utilization WHERE ' . array_to_sql_or($selected_items, 'id'));
+					//cacti_log('DELETE FROM plugin_report_channel_utilization_detail WHERE ' . array_to_sql_or($selected_items, 'report_channel_utilization_id'));
+					//cacti_log('DELETE FROM plugin_report_channel_utilization_excel WHERE ' . array_to_sql_or($selected_items, 'report_channel_utilization_id'));
+					db_execute('DELETE FROM plugin_report_channel_utilization WHERE ' . array_to_sql_or($selected_items, 'id'));
+					db_execute('DELETE FROM plugin_report_channel_utilization_detail WHERE ' . array_to_sql_or($selected_items, 'report_channel_utilization_id'));
+					db_execute('DELETE FROM plugin_report_channel_utilization_excel WHERE ' . array_to_sql_or($selected_items, 'report_channel_utilization_id'));
+				}
+			}
+			header('Location: report.php?action=channel_utilization&header=false');
+			exit;
+		}
+		//宽带通道预警删除操作end
+		$report_channel_utilization_html = ''; $i = 0; $report_channel_utilization_id_list='';
 		foreach ($_POST as $var => $val) {
 			if (preg_match('/^chk_([0-9]+)$/', $var, $matches)) {
+				/* ================= input validation ================= */
 				input_validate_input_number($matches[1]);
-				$report_idc_statistic_id_list[$i] = $matches[1];
+				$report_channel_utilization_name=html_escape(db_fetch_cell_prepared('SELECT name FROM plugin_report_channel_utilization WHERE id = ?', array($matches[1])));
+				/* ==================================================== */
+				if(get_nfilter_request_var('drp_action') == '31'){//删除
+					$report_channel_utilization_html .= '<li>' . $report_channel_utilization_name  . '</li>';
+				}
+				if(get_nfilter_request_var('drp_action') == '32'){//下载
+					$report_channel_utilization_html .= '<h3>' . $report_channel_utilization_name  . '</h3>';
+					$report_channel_utilization_html .='<ul>';
+					//获取excel集合
+					$report_channel_utilization_excel_array_1= db_fetch_assoc("SELECT * FROM plugin_report_channel_utilization_excel WHERE  excel_type='实时统计' and report_channel_utilization_id = ". $matches[1] . " order by last_modified desc limit 1");
+					//$report_channel_utilization_excel_array_2= db_fetch_assoc("SELECT * FROM plugin_report_channel_utilization_excel WHERE  excel_type!='实时统计' and report_channel_utilization_id = ". $matches[1] . " order by last_modified desc");
+					$report_channel_utilization_excel_array_2= db_fetch_assoc("SELECT * FROM plugin_report_channel_utilization_excel WHERE ( excel_type='周统计' or excel_type='月统计')  and report_channel_utilization_id = ". $matches[1] . " order by last_modified desc");
+
+					$report_channel_utilization_excel_array=array_merge($report_channel_utilization_excel_array_1,$report_channel_utilization_excel_array_2);
+					if(cacti_count($report_channel_utilization_excel_array)==0){
+						$report_channel_utilization_html .= '<li>暂无数据</li>';
+					}else{
+						foreach ($report_channel_utilization_excel_array as $report_channel_utilization_excel){
+							//$report_channel_utilization_html .= '<li><a target="_blank" href="' . $config['url_path'] . $report_channel_utilization_excel['excel_path'] . '" download="' . $report_channel_utilization_excel['excel_name'] . '">' . html_escape($report_channel_utilization_excel['excel_name']) . '</a>----'.$report_channel_utilization_excel['excel_type'] . '</li>';
+							$report_channel_utilization_html .= '<li><a target="_blank" href="' . $config['url_path'] . $report_channel_utilization_excel['excel_path']  . '" download="' . $report_channel_utilization_excel['excel_name'] . '">' . html_escape($report_channel_utilization_excel['excel_name']) . '</a></li>';
+						}
+					}
+					//获取excel集合
+					$report_channel_utilization_html .='</ul>';
+				}
+				$report_channel_utilization_id_list[$i] = $matches[1];
 				$i++;
 			}
 		}
-		if (isset($report_idc_statistic_id_list) && cacti_sizeof($report_idc_statistic_id_list)) {
-			if (get_nfilter_request_var('drp_action') == '23') {//记录操作
-				if(cacti_sizeof($report_idc_statistic_id_list)>1){
-					raise_message(2,'只能选择一条数据操作',MESSAGE_LEVEL_ERROR);
-					header('Location: report.php?action=idc_statistic&header=false');
-					exit;
-				}else{
-					header('Location: report.php?action=idc_statistic_import&idc_statistic_id=' . $report_idc_statistic_id_list[0]);
-					exit;
-				}
+		top_header();
+		form_start('report.php');
+		html_start_box($channel_utilization_actions[get_nfilter_request_var('drp_action')], '60%', '', '3', 'center', '');
+		if (isset($report_channel_utilization_id_list) && cacti_sizeof($report_channel_utilization_id_list)) {
+			if (get_nfilter_request_var('drp_action') == '31') { /* delete */
+				print "<tr>
+					<td class='textArea' class='odd'>
+						<p>点击'继续'删除以下宽带通道预警</p>
+						<div class='itemlist'><ul>$report_channel_utilization_html</ul></div>
+					</td>
+				</tr>\n";
+				$save_html = "<input type='button' class='ui-button ui-corner-all ui-widget' value='" . __esc('Cancel') . "' onClick='cactiReturnTo()'>&nbsp;<input type='submit' class='ui-button ui-corner-all ui-widget' value='" . __esc('Continue') . "' title='删除宽带通道预警'>";
+			}
+			if (get_nfilter_request_var('drp_action') == '32') { /* download */
+				print "<tr>
+					<td class='textArea' class='odd'>
+						<p>点击文件名称下载报表</p>
+						<div class='itemlist'>$report_channel_utilization_html</div>
+					</td>
+				</tr>\n";
+				$save_html = "<input type='button' class='ui-button ui-corner-all ui-widget' value='" . __esc('Cancel') . "' onClick='cactiReturnTo()'>";
 			}
 		} else {
 			raise_message(40);
-			header('Location: report.php?action=idc_statistic&header=false');
+			header('Location: report.php?action=channel_utilization&header=false');
 			exit;
 		}
+		print "<tr>
+					<td class='saveRow'>
+						<input type='hidden' name='action' value='actions'>
+						<input type='hidden' name='selected_items' value='" . (isset($report_channel_utilization_id_list) ? serialize($report_channel_utilization_id_list) : '') . "'>
+						<input type='hidden' name='drp_action' value='" . html_escape(get_nfilter_request_var('drp_action')) . "'>
+						$save_html
+					</td>
+				</tr>\n";
+		html_end_box();
+		form_end();
+		bottom_footer();
 	}
-	/***********************IDC导出操作end ************************/
+	/**********************宽带通道预警管理操作end***********************/
 
 	/***************************************流量结算统计导出操作begin*************************************** */
 	if(get_nfilter_request_var('drp_action') == '13'){
@@ -328,5 +416,62 @@ function form_actions() {
 	}
 	/***********************流量结算统计导出操作end ************************/
 
+	/***************************************IDC导出操作begin*************************************** */
+	if(get_nfilter_request_var('drp_action') == '23'){
+		$report_idc_statistic_id_list = ''; $i = 0;
+		foreach ($_POST as $var => $val) {
+			if (preg_match('/^chk_([0-9]+)$/', $var, $matches)) {
+				input_validate_input_number($matches[1]);
+				$report_idc_statistic_id_list[$i] = $matches[1];
+				$i++;
+			}
+		}
+		if (isset($report_idc_statistic_id_list) && cacti_sizeof($report_idc_statistic_id_list)) {
+			if (get_nfilter_request_var('drp_action') == '23') {//记录操作
+				if(cacti_sizeof($report_idc_statistic_id_list)>1){
+					raise_message(2,'只能选择一条数据操作',MESSAGE_LEVEL_ERROR);
+					header('Location: report.php?action=idc_statistic&header=false');
+					exit;
+				}else{
+					header('Location: report.php?action=idc_statistic_import&idc_statistic_id=' . $report_idc_statistic_id_list[0]);
+					exit;
+				}
+			}
+		} else {
+			raise_message(40);
+			header('Location: report.php?action=idc_statistic&header=false');
+			exit;
+		}
+	}
+	/***********************IDC导出操作end ************************/
+	
+	/***************************************宽带通道预警导出操作begin*************************************** */
+	if(get_nfilter_request_var('drp_action') == '33'){
+		$report_channel_utilization_id_list = ''; $i = 0;
+		foreach ($_POST as $var => $val) {
+			if (preg_match('/^chk_([0-9]+)$/', $var, $matches)) {
+				input_validate_input_number($matches[1]);
+				$report_channel_utilization_id_list[$i] = $matches[1];
+				$i++;
+			}
+		}
+		if (isset($report_channel_utilization_id_list) && cacti_sizeof($report_channel_utilization_id_list)) {
+			if (get_nfilter_request_var('drp_action') == '33') {//记录操作
+				if(cacti_sizeof($report_channel_utilization_id_list)>1){
+					raise_message(2,'只能选择一条数据操作',MESSAGE_LEVEL_ERROR);
+					header('Location: report.php?action=channel_utilization&header=false');
+					exit;
+				}else{
+					header('Location: report.php?action=channel_utilization_import&channel_utilization_id=' . $report_channel_utilization_id_list[0]);
+					exit;
+				}
+			}
+		} else {
+			raise_message(40);
+			header('Location: report.php?action=channel_utilization&header=false');
+			exit;
+		}
+	}
+	/***********************宽带通道预警导出操作end ************************/
 }
 ?>

@@ -5,7 +5,8 @@ function report_tabs($current_tab='traffic') {
 	/* present a tabbed interface */
 	$tabs = array(
 		'traffic_settlement'    => __('流量结算统计', 'report'),
-		'idc_statistic'=> __('IDC统计', 'report')
+        'idc_statistic'=> __('IDC统计', 'report'),
+        'channel_utilization'=> __('宽带通道预警', 'report')
 	);
 	$tabs = api_plugin_hook_function('report_tabs', $tabs);//资产管理table
 	get_filter_request_var('tab', FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => '/^([a-zA-Z]+)$/')));
@@ -178,12 +179,15 @@ function getCellIndex($index){
     return $cellIndex;
 }
 
-//遍历集合end
+/**
+ * idc excel统计
+ */
 function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_begin_date,$data_end_date){
+    $report_idc_statistic_id=$report_idc_statistic['id'];
     $excel_name=$report_idc_statistic['name'] . '-';
     $excel_name=$excel_name . ('IDC统计报表(' . $data_begin_date . '至' . $data_end_date . ')');
     $excel_type=$idc_statistic_type;//excel类型
-    $report_idc_statistic_excel= db_fetch_row_prepared("SELECT * FROM plugin_report_idc_statistic_excel WHERE excel_name = '" . $excel_name . "' and excel_type = '" . $excel_type . "'");
+    $report_idc_statistic_excel= db_fetch_row_prepared("SELECT * FROM plugin_report_idc_statistic_excel WHERE report_idc_statistic_id=" . $report_idc_statistic_id ." and excel_name = '" . $excel_name . "' and excel_type = '" . $excel_type . "'");
     if(isset($report_idc_statistic_excel['id'])&&$report_idc_statistic_excel['excel_type']!='手工统计'){//数据库中已经存在记录
         return;
      }
@@ -237,6 +241,7 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
     );
     $objReader = PHPExcel_IOFactory::createReader('Excel2007');//创建一个读Excel模版的对象
     $objPHPExcel = $objReader->load (dirname(__FILE__) . "/templates/idc_statistic.xlsx" );//获取模版
+    $objPHPExcel->getDefaultStyle()->getFont()->setName('宋体');//字体
     // 操作第一个工作表
     $objActSheet = $objPHPExcel->getActiveSheet();//获取当前活动的表
     $objActSheet->setTitle('IDC统计报表('. $data_begin_date . '至' . $data_end_date . ')');
@@ -310,7 +315,8 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
     /************************************第二行操作完成*************************************/
 
     /************************************数据行操作开始*************************************/
-    for($cell_date=strtotime($data_begin_date),$y=3;$cell_date<=strtotime($data_end_date); $cell_date+= 86400,$y++) {
+    $y=3;
+    for($cell_date=strtotime($data_begin_date);$cell_date<=strtotime($data_end_date); $cell_date+= 86400,$y++) {
         $data_date=date('Y-m-d',$cell_date);
         $sql="select * from plugin_report_idc_statistic_detail where report_idc_statistic_id=" . $report_idc_statistic['id'] . " and data_date='".$data_date."'";
         $report_idc_statistic_detail_array = db_fetch_assoc($sql);
@@ -373,6 +379,15 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
     }
     /************************************数据行操作结束*************************************/
 
+    /************************************制作表人行操作开始*************************************/
+    $objActSheet->getRowDimension($y)->setRowHeight(28);//行高
+    $objActSheet->mergeCells('A' . $y . ':' . getCellIndex($x) . $y);
+     // 设置靠左显示
+     $objActSheet->getStyle('A' .$y)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_JUSTIFY);
+     $objActSheet->getStyle('A' .$y)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+     $objActSheet->setCellValue('A' .$y, "    制表人：        审核人：       日期：" . $data_begin_date . '至' . $data_end_date );
+    /************************************制作表人行操作结束*************************************/
+
     /************************************保存excel begin*************************************/
     $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
     $path='plugins/report/excel/idc_statistic/' . $excel_name . '.xlsx';
@@ -425,10 +440,11 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
 
 //流量结算统计导出excel
 function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement_type,$data_begin_date,$data_end_date){
+    $report_traffic_settlement_id=$report_traffic_settlement['id'];
     $excel_name=$report_traffic_settlement['name'] . '-';
     $excel_name=$excel_name . ('流量结算统计报表(' . $data_begin_date . '至' . $data_end_date . ')');
     $excel_type=$traffic_settlement_type;//excel类型
-    $report_traffic_settlement_excel= db_fetch_row_prepared("SELECT * FROM plugin_report_traffic_settlement_excel WHERE excel_name = '" . $excel_name . "' and excel_type = '" . $excel_type . "'");
+    $report_traffic_settlement_excel= db_fetch_row_prepared("SELECT * FROM plugin_report_traffic_settlement_excel WHERE report_traffic_settlement_id=" . $report_traffic_settlement_id . " and excel_name = '" . $excel_name . "' and excel_type = '" . $excel_type . "'");
     if(isset($report_traffic_settlement_excel['id'])&&$report_traffic_settlement_excel['excel_type']!='手动统计'){//数据库中已经存在记录
        return;
     }
@@ -450,6 +466,7 @@ function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement
     );
     $objReader = PHPExcel_IOFactory::createReader('Excel2007');//创建一个读Excel模版的对象
     $objPHPExcel = $objReader->load (dirname(__FILE__) . "/templates/traffic_settlement.xlsx" );//获取流量结算模版
+    $objPHPExcel->getDefaultStyle()->getFont()->setName('宋体');//字体
     // 操作第一个工作表
     $objActSheet = $objPHPExcel->getActiveSheet();//获取当前活动的表
     $objActSheet->setTitle('流量结算统计报表('. $data_begin_date . '至' . $data_end_date . ')');
@@ -633,10 +650,11 @@ function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement
     $y++;
     /************************************合计行操作结束*************************************/
     /************************************制作表人行操作开始*************************************/
-    $objActSheet->getRowDimension($y)->setRowHeight(20);//行高
+    $objActSheet->getRowDimension($y)->setRowHeight(28);//行高
     $objActSheet->mergeCells('A' . $y . ':' . $cellIndex . $y);
      // 设置靠左显示
      $objActSheet->getStyle('A' .$y)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_JUSTIFY);
+     $objActSheet->getStyle('A' .$y)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
      $objActSheet->setCellValue('A' .$y, "     制表人：                                 审核人：                                                   日期：" . $data_begin_date . '至' . $data_end_date );
     /************************************制作表人行操作结束*************************************/
 
@@ -686,5 +704,177 @@ function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement
     $report_traffic_settlement_excel['description']=$excel_name;
     $report_traffic_settlement_excel['last_modified'] = date('Y-m-d H:i:s', time());
     sql_save($report_traffic_settlement_excel, 'plugin_report_traffic_settlement_excel');
+    /************************************发送邮件end*************************************/
+}
+
+/**
+ * 宽带通道预警 excel统计
+ */
+function channel_utilization_excel($report_channel_utilization,$channel_utilization_type,$data_begin_date,$data_end_date){
+    $report_channel_utilization_id=$report_channel_utilization['id'];//主键ID
+    $utilization_ratio_threshold=$report_channel_utilization['utilization_ratio_threshold'];//利用率阈值(%)
+    $excel_name=$report_channel_utilization['name'] . '-';
+    $excel_name=$excel_name . ('宽带通道预警报表(' . $data_begin_date . '至' . $data_end_date . ')');
+    $excel_type=$channel_utilization_type;//excel类型
+    $report_channel_utilization_excel= db_fetch_row_prepared("SELECT * FROM plugin_report_channel_utilization_excel WHERE report_channel_utilization_id=" . $report_channel_utilization_id . " and excel_name = '" . $excel_name . "' and excel_type = '" . $excel_type . "'");
+    if(isset($report_channel_utilization_excel['id'])&&$report_channel_utilization_excel['excel_type']!='手工统计'){//数据库中已经存在记录
+        return;
+    }
+    $style_array = array(
+        'borders' => array(
+            'allborders' => array(
+                'style' =>PHPExcel_Style_Border::BORDER_THIN
+            )
+        ),
+        'font'=> array (  
+            'bold'=> true  
+        ),
+        'alignment' => array (  
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+            'vertical'=> PHPExcel_Style_Alignment::VERTICAL_CENTER
+        )
+    );
+    //第一行的样式
+    $style_array_1 = array(
+        'borders' => array(
+            'allborders' => array(
+                'style' =>PHPExcel_Style_Border::BORDER_THIN
+            )
+        ),
+        'font'=> array (  
+            'bold'=> true  
+        ),
+        'alignment' => array (  
+            'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_JUSTIFY,
+            'vertical'=> PHPExcel_Style_Alignment::VERTICAL_CENTER
+        )
+    );
+    $objReader = PHPExcel_IOFactory::createReader('Excel2007');//创建一个读Excel模版的对象
+    $objPHPExcel = $objReader->load (dirname(__FILE__) . "/templates/channel_utilization.xlsx" );//获取模版
+    $objPHPExcel->getDefaultStyle()->getFont()->setName('宋体');//字体
+    // 操作第一个工作表
+    $objActSheet = $objPHPExcel->getActiveSheet();//获取当前活动的表
+    $objActSheet->setTitle('宽带通道预警报表('. $data_begin_date . '至' . $data_end_date . ')');
+    
+    /************************************第一行操作开始*************************************/
+    $objActSheet->setCellValue('A1', $report_channel_utilization['name'] . '('. $data_begin_date . '至' . $data_end_date . ')');
+    /************************************第一行操作完成*************************************/
+
+    /************************************第二行操作开始*************************************/
+    
+    /************************************第二行操作完成*************************************/
+
+    /************************************数据行操作开始*************************************/
+    $number=1;//序号
+    $y=3;//纵坐标从第四行开始
+    // //第一层循环遍历begin
+    // $extension=json_decode($report_channel_utilization['extension'],true);//将json字符串转为对象
+    // $datas_checked=$extension['datas_checked'];//报表配置data
+    // foreach ($datas_checked as $firstData){//第一层地区数据
+    //     if(isset($firstData['checked'])&&$firstData['checked']){//区县是否选中状态
+    //         if(isset($firstData['children'])){
+    //             foreach ($firstData['children'] as $secondtData){//遍历图形data
+    //                 if(isset($secondtData['local_graph_id'])&&isset($secondtData['checked'])&&$secondtData['checked']){
+    //                     $city_id=$secondtData['id'];//城市ID
+    //                     $objActSheet->setCellValue('A' . $y , $number);
+    //                     $objActSheet->getStyle('A' . $y)->applyFromArray($style_array);//设置边框样式
+    //                     $objActSheet->getRowDimension($y)->setRowHeight(25);//行高
+    //                     $y++;
+    //                     $number++;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // //第一层循环遍历end
+    $sql="select city_name,max(utilization_ratio_out) as utilization_ratio_out from plugin_report_channel_utilization_detail  where report_channel_utilization_id=" . $report_channel_utilization_id . " and utilization_ratio_out>=" . $utilization_ratio_threshold . "  and data_date>='" .$data_begin_date. "' and data_date<='" .$data_end_date. "' group by city_id order by utilization_ratio_out desc";
+    $data_array = db_fetch_assoc($sql);
+    foreach($data_array as $data) {
+
+        $objActSheet->setCellValue('A' . $y , $number);
+        $objActSheet->getStyle('A' . $y)->applyFromArray($style_array);//设置边框样式
+        
+        $objActSheet->setCellValue('B' . $y , $data['city_name']);
+        $objActSheet->getStyle('B' . $y)->applyFromArray($style_array);//设置边框样式
+
+        $objActSheet->setCellValue('C' . $y , round($data['utilization_ratio_out'],4)*100 . '%');
+        $objActSheet->getStyle('C' . $y)->applyFromArray($style_array);//设置边框样式
+
+        $objActSheet->getStyle('D' . $y)->applyFromArray($style_array);//设置边框样式
+        
+        $objActSheet->getRowDimension($y)->setRowHeight(25);//行高
+        $y++;
+        $number++;
+    }
+    /************************************数据行操作结束*************************************/
+
+    /************************************备注行操作开始*************************************/
+    $objActSheet->getRowDimension($y)->setRowHeight(28);//行高
+    $objActSheet->getStyle('A' . $y)->applyFromArray($style_array_1);//设置边框样式
+    $objActSheet->getStyle('B' . $y)->applyFromArray($style_array_1);//设置边框样式
+    $objActSheet->getStyle('C' . $y)->applyFromArray($style_array_1);//设置边框样式
+    $objActSheet->getStyle('D' . $y)->applyFromArray($style_array_1);//设置边框样式
+    $objActSheet->mergeCells('A' . $y . ':' . 'D' . $y);
+    $objActSheet->setCellValue('A' .$y, "备注:列表中只包含宽带传输通道利用率>=" . $utilization_ratio_threshold*100 . "%的分支公司" );
+    $objActSheet->getStyle('A' . $y)->applyFromArray($style_array_1);//设置边框样式
+    $y++;
+    /************************************备注行操作结束*************************************/
+
+    /************************************制作表人行操作开始*************************************/
+    $objActSheet->getRowDimension($y)->setRowHeight(28);//行高
+    $objActSheet->mergeCells('A' . $y . ':' . 'D' . $y);
+    $objActSheet->getStyle('A' .$y)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_JUSTIFY);
+    $objActSheet->getStyle('A' .$y)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+    $objActSheet->setCellValue('A' .$y, "制表人：        审核人：       日期：" . $data_begin_date . '至' . $data_end_date );
+    $y++;
+    /************************************制作表人行操作结束*************************************/
+   
+    /************************************保存excel begin*************************************/
+    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+    $path='plugins/report/excel/channel_utilization/' . $excel_name . '.xlsx';
+    $objWriter->save(dirname(__FILE__) . '/excel/channel_utilization/' . $excel_name . '.xlsx');
+    /************************************保存excel end*************************************/
+
+    /************************************发送邮件begin*************************************/
+    $report_channel_utilization_excel['report_channel_utilization_id']=$report_channel_utilization['id'];
+    $report_channel_utilization_excel['excel_name']=$excel_name;
+    $report_channel_utilization_excel['excel_type']=$excel_type;
+    $report_channel_utilization_excel['excel_path']=$path;
+    if($report_channel_utilization_excel['excel_type']!='实时统计'&&$report_channel_utilization_excel['excel_type']!='手动统计'){//实时统计不需要发送邮件
+        if($excel_type=='日统计'){
+            $report_channel_utilization['emails']=$report_channel_utilization['emails_day'];
+        }
+        if($excel_type=='周统计'){
+            $report_channel_utilization['emails']=$report_channel_utilization['emails_week'];
+        }
+        if($excel_type=='月统计'){
+            $report_channel_utilization['emails']=$report_channel_utilization['emails_month'];
+        }
+        if(isset($report_channel_utilization['emails'])){
+            $msg='<h3>' .$excel_name . '</h3>';
+            //$msg=$msg .'<br>';
+            //$msg=$msg . '<a>http://106.13.81.220/cacti/'. $path .'</a>';
+            $report_channel_utilization_excel['subject']=$excel_name;
+            $report_channel_utilization_excel['body']=$msg;
+            $report_channel_utilization_excel['to_emails']=$report_channel_utilization['emails'];
+            //附件begin
+            $attachments=array();
+            $attachment=array();
+            $attachment['attachment']=$path;
+            $attachment['filename']=$excel_name . '.xlsx';
+            $attachment['mime_type']='xlsx';
+            $attachments[$excel_name]= $attachment;
+            //附近end
+            $errors = send_mail($report_channel_utilization['emails'],"",$excel_name,$msg,$attachments,"",true);
+            if($errors == ''){
+                $report_channel_utilization_excel['status']='邮件发送成功';
+            }else{
+                $report_channel_utilization_excel['status']='邮件发送失败';
+            }
+        }
+    }
+    $report_channel_utilization_excel['description']=$excel_name;
+    $report_channel_utilization_excel['last_modified'] = date('Y-m-d H:i:s', time());
+    sql_save($report_channel_utilization_excel, 'plugin_report_channel_utilization_excel');
     /************************************发送邮件end*************************************/
 }
