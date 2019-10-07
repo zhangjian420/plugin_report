@@ -399,7 +399,7 @@ function traffic_settlement(){
     $sql_order = get_order_string();
     $sql_limit = ' LIMIT ' . ($rows*(get_request_var('page')-1)) . ',' . $rows;
     $traffic_settlement_list = db_fetch_assoc("SELECT * FROM plugin_report_traffic_settlement WHERE 1=1 $sql_where $sql_order $sql_limit");
-    cacti_log("SELECT * FROM plugin_report_traffic_settlement WHERE 1=1 " . $sql_where . $sql_order . $sql_limit);
+    //cacti_log("SELECT * FROM plugin_report_traffic_settlement WHERE 1=1 " . $sql_where . $sql_order . $sql_limit);
     $nav = html_nav_bar('report.php?action=traffic_settlement&filter=' . get_request_var('filter'), MAX_DISPLAY_PAGES, get_request_var('page'), $rows, $total_rows, 5, "流量结算统计", 'page', 'main');
     form_start('report.php?action=traffic_settlement', 'chk');//分页表单开始
     print $nav;

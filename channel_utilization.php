@@ -409,7 +409,7 @@ function channel_utilization(){
     $sql_order = get_order_string();
     $sql_limit = ' LIMIT ' . ($rows*(get_request_var('page')-1)) . ',' . $rows;
     $channel_utilization_list = db_fetch_assoc("SELECT * FROM plugin_report_channel_utilization WHERE 1=1 $sql_where $sql_order $sql_limit");
-    cacti_log("SELECT * FROM plugin_report_channel_utilization WHERE 1=1 " . $sql_where . $sql_order . $sql_limit);
+    //cacti_log("SELECT * FROM plugin_report_channel_utilization WHERE 1=1 " . $sql_where . $sql_order . $sql_limit);
     $nav = html_nav_bar('report.php?action=channel_utilization&filter=' . get_request_var('filter'), MAX_DISPLAY_PAGES, get_request_var('page'), $rows, $total_rows, 5, "宽带通道预警", 'page', 'main');
     form_start('report.php?action=channel_utilization', 'chk');//分页表单开始
     print $nav;
@@ -495,20 +495,20 @@ function channel_utilization_import(){
     ?>
     <script>
         $(document).ready(function(){
-                $("#channel_utilization_import_begin_date").prop("readonly", true).datepicker({
-                    changeMonth: false,
-                    dateFormat: "yy-mm-dd",
-                    onClose: function(selectedDate) {
+            $("#channel_utilization_import_begin_date").prop("readonly", true).datepicker({
+                changeMonth: false,
+                dateFormat: "yy-mm-dd",
+                onClose: function(selectedDate) {
 
-                    }
-                });
-                $("#channel_utilization_import_end_date").prop("readonly", true).datepicker({
-                    changeMonth: false,
-                    dateFormat: "yy-mm-dd",
-                    onClose: function(selectedDate) {
+                }
+            });
+            $("#channel_utilization_import_end_date").prop("readonly", true).datepicker({
+                changeMonth: false,
+                dateFormat: "yy-mm-dd",
+                onClose: function(selectedDate) {
 
-                    }
-                });
+                }
+            });
         });
     </script>
     <?php

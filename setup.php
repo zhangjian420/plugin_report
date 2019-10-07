@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 安装时的方法
  */
@@ -13,14 +12,12 @@ function plugin_report_install() {
     api_plugin_register_realm('report', 'report.php', '报表管理', 1);
     report_setup_table();
 }
-
 /**
  * 卸载时候的方法
  */
 function plugin_report_uninstall() {
 
 }
-
 /**
  * 用于检查插件的版本，并提供更多信息
  * @return mixed
@@ -30,14 +27,12 @@ function plugin_report_version() {
     $info = parse_ini_file($config['base_path'] . '/plugins/report/INFO', true);
     return $info['info'];
 }
-
 /**
  * 用于确定您的插件是否已准备好在安装后启用
  */
 function plugin_report_check_config() {
     return true;
 }
-
 /**
  * 显示顶部选项卡
  */
@@ -45,7 +40,6 @@ function report_show_tab() {
     global $config;
     print '<a href="' . $config['url_path'] . 'plugins/report/report.php"><img src="' . $config['url_path'] . 'plugins/monitor/images/tab_monitor.gif" alt="报表管理"></a>';
 }
-
 /**
  * 面包屑
  */
@@ -68,14 +62,15 @@ function report_draw_navigation_text ($nav) {
 
     return $nav;
 }
-
 /**
  * 自定义js
  */
 function plugin_report_page_head() {
      print get_md5_include_css('plugins/report/include/css/report.css') . PHP_EOL;
 }
-
+/**
+ * setup_table
+ */
 function report_setup_table() {
     
 }

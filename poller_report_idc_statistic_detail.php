@@ -4,7 +4,7 @@ chdir("../../");
 require("./include/cli_check.php");
 include_once($config['base_path'] . '/lib/rrd.php');
 include_once($config['base_path'] . '/plugins/report/report_functions.php');//报表管理公共函数文件
-cacti_log("<<<<<<<<<<<<<<<<IDC统计详情时任务执行>>>>>>>>>>>>>>>> " . date('Y-m-d H:i:s', time()));
+//cacti_log("<<<<<<<<<<<<<<<<IDC统计详情时任务执行>>>>>>>>>>>>>>>> " . date('Y-m-d H:i:s', time()));
 $report_idc_statistic_array = db_fetch_assoc("select * from plugin_report_idc_statistic where status_detail!='已执行'");
 //遍历集合begin
 foreach($report_idc_statistic_array as $report_idc_statistic) {

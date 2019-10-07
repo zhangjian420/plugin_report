@@ -97,7 +97,6 @@ function ajax_tree(){
     $data=get_tree_data($graph_tree_id,0);
     print json_encode($data);
 }
-
 /**
  * form_actions
  */
@@ -165,20 +164,20 @@ function form_actions() {
 		if (isset($report_traffic_settlement_id_list) && cacti_sizeof($report_traffic_settlement_id_list)) {
 			if (get_nfilter_request_var('drp_action') == '11') { /* delete */
 				print "<tr>
-					<td class='textArea' class='odd'>
-						<p>点击'继续'删除以下流量结算</p>
-						<div class='itemlist'><ul>$report_traffic_settlement_html</ul></div>
-					</td>
-				</tr>\n";
+							<td class='textArea' class='odd'>
+								<p>点击'继续'删除以下流量结算</p>
+								<div class='itemlist'><ul>$report_traffic_settlement_html</ul></div>
+							</td>
+						</tr>\n";
 				$save_html = "<input type='button' class='ui-button ui-corner-all ui-widget' value='" . __esc('Cancel') . "' onClick='cactiReturnTo()'>&nbsp;<input type='submit' class='ui-button ui-corner-all ui-widget' value='" . __esc('Continue') . "' title='删除流量结算'>";
 			}
 			if (get_nfilter_request_var('drp_action') == '12') { /* download */
 				print "<tr>
-					<td class='textArea' class='odd'>
-						<p>点击文件名称下载报表</p>
-						<div class='itemlist'>$report_traffic_settlement_html</div>
-					</td>
-				</tr>\n";
+							<td class='textArea' class='odd'>
+								<p>点击文件名称下载报表</p>
+								<div class='itemlist'>$report_traffic_settlement_html</div>
+							</td>
+						</tr>\n";
 				$save_html = "<input type='button' class='ui-button ui-corner-all ui-widget' value='" . __esc('Cancel') . "' onClick='cactiReturnTo()'>";
 			}
 		} else {
@@ -258,11 +257,11 @@ function form_actions() {
 		if (isset($report_idc_statistic_id_list) && cacti_sizeof($report_idc_statistic_id_list)) {
 			if (get_nfilter_request_var('drp_action') == '21') { /* delete */
 				print "<tr>
-					<td class='textArea' class='odd'>
-						<p>点击'继续'删除以下IDC统计</p>
-						<div class='itemlist'><ul>$report_idc_statistic_html</ul></div>
-					</td>
-				</tr>\n";
+							<td class='textArea' class='odd'>
+								<p>点击'继续'删除以下IDC统计</p>
+								<div class='itemlist'><ul>$report_idc_statistic_html</ul></div>
+							</td>
+						</tr>\n";
 				$save_html = "<input type='button' class='ui-button ui-corner-all ui-widget' value='" . __esc('Cancel') . "' onClick='cactiReturnTo()'>&nbsp;<input type='submit' class='ui-button ui-corner-all ui-widget' value='" . __esc('Continue') . "' title='删除IDC统计'>";
 			}
 			if (get_nfilter_request_var('drp_action') == '22') { /* download */
@@ -352,20 +351,20 @@ function form_actions() {
 		if (isset($report_channel_utilization_id_list) && cacti_sizeof($report_channel_utilization_id_list)) {
 			if (get_nfilter_request_var('drp_action') == '31') { /* delete */
 				print "<tr>
-					<td class='textArea' class='odd'>
-						<p>点击'继续'删除以下宽带通道预警</p>
-						<div class='itemlist'><ul>$report_channel_utilization_html</ul></div>
-					</td>
-				</tr>\n";
+							<td class='textArea' class='odd'>
+								<p>点击'继续'删除以下宽带通道预警</p>
+								<div class='itemlist'><ul>$report_channel_utilization_html</ul></div>
+							</td>
+						</tr>\n";
 				$save_html = "<input type='button' class='ui-button ui-corner-all ui-widget' value='" . __esc('Cancel') . "' onClick='cactiReturnTo()'>&nbsp;<input type='submit' class='ui-button ui-corner-all ui-widget' value='" . __esc('Continue') . "' title='删除宽带通道预警'>";
 			}
 			if (get_nfilter_request_var('drp_action') == '32') { /* download */
 				print "<tr>
-					<td class='textArea' class='odd'>
-						<p>点击文件名称下载报表</p>
-						<div class='itemlist'>$report_channel_utilization_html</div>
-					</td>
-				</tr>\n";
+							<td class='textArea' class='odd'>
+								<p>点击文件名称下载报表</p>
+								<div class='itemlist'>$report_channel_utilization_html</div>
+							</td>
+						</tr>\n";
 				$save_html = "<input type='button' class='ui-button ui-corner-all ui-widget' value='" . __esc('Cancel') . "' onClick='cactiReturnTo()'>";
 			}
 		} else {

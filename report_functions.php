@@ -11,7 +11,6 @@ function report_tabs($current_tab='traffic') {
 	$tabs = api_plugin_hook_function('report_tabs', $tabs);//资产管理table
 	get_filter_request_var('tab', FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => '/^([a-zA-Z]+)$/')));
 	load_current_session_value('tab', 'sess_report_tab', 'general');
-	//$current_tab = get_request_var('action');//得到当前选项卡
 	print "<div class='tabs'><nav><ul>\n";
 	if (cacti_sizeof($tabs)) {//得到选项卡
 		foreach (array_keys($tabs) as $tab_short_name) {
@@ -178,7 +177,6 @@ function getCellIndex($index){
     }
     return $cellIndex;
 }
-
 /**
  * idc excel统计
  */
@@ -382,7 +380,7 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
     /************************************制作表人行操作开始*************************************/
     $objActSheet->getRowDimension($y)->setRowHeight(28);//行高
     $objActSheet->mergeCells('A' . $y . ':' . getCellIndex($x) . $y);
-     // 设置靠左显示
+     //设置靠左显示
      $objActSheet->getStyle('A' .$y)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_JUSTIFY);
      $objActSheet->getStyle('A' .$y)->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
      $objActSheet->setCellValue('A' .$y, "    制表人：        审核人：       日期：" . $data_begin_date . '至' . $data_end_date );
@@ -437,8 +435,9 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
     sql_save($report_idc_statistic_excel, 'plugin_report_idc_statistic_excel');
     /************************************发送邮件end*************************************/
 }
-
-//流量结算统计导出excel
+/*
+ *流量结算统计导出excel
+ */
 function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement_type,$data_begin_date,$data_end_date){
     $report_traffic_settlement_id=$report_traffic_settlement['id'];
     $excel_name=$report_traffic_settlement['name'] . '-';
@@ -706,7 +705,6 @@ function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement
     sql_save($report_traffic_settlement_excel, 'plugin_report_traffic_settlement_excel');
     /************************************发送邮件end*************************************/
 }
-
 /**
  * 宽带通道预警 excel统计
  */
