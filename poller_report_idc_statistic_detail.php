@@ -49,6 +49,14 @@ foreach($report_idc_statistic_array as $report_idc_statistic) {
                                 $fourth_data_max_in=0;
                                 $five_data_max_in=0;
                                 $six_data_max_in=0;
+                                //top6
+                                $first_data_max=0;
+                                $second_data_max=0;
+                                $three_data_max=0;
+                                $fourth_data_max=0;
+                                $five_data_max=0;
+                                $six_data_max=0;
+
                                 if(empty($local_data)){ //说明是聚合图形
                                     $graph_data_array = array("graph_start"=>strtotime($data_date . " 00:00:00"),"graph_end"=>strtotime($data_date . " 23:59:59"),"export_csv"=>true);
                                     $xport_meta = array();
@@ -68,8 +76,10 @@ foreach($report_idc_statistic_array as $report_idc_statistic) {
                                                 $traffic_out[]=getUnitVal(end($datas));
                                             }
                                         }
+                                        $traffic_all=array_merge($traffic_in,$traffic_out);//合并数组
                                         rsort($traffic_in);//降序操作
                                         rsort($traffic_out);//降序操作
+                                        rsort($traffic_all);//降序操作
                                         //出口top6
                                         $first_data_max_out=array_shift($traffic_out);
                                         $second_data_max_out=array_shift($traffic_out);
@@ -84,27 +94,42 @@ foreach($report_idc_statistic_array as $report_idc_statistic) {
                                         $fourth_data_max_in=array_shift($traffic_in);
                                         $five_data_max_in=array_shift($traffic_in);
                                         $six_data_max_in=array_shift($traffic_in);
+                                        //top6
+                                        $first_data_max=array_shift($traffic_all);
+                                        $second_data_max=array_shift($traffic_all);
+                                        $three_data_max=array_shift($traffic_all);
+                                        $fourth_data_max=array_shift($traffic_all);
+                                        $five_data_max=array_shift($traffic_all);
+                                        $six_data_max=array_shift($traffic_all);
                                     }
-                                    //cacti_log("聚合图形upper_limit=". json_encode($upper_limit));
-                                    //cacti_log("聚合图形data_max_out=". json_encode($data_max_out));
-                                    //cacti_log("聚合图形data_max_in=". json_encode($data_max_in));
                                 }else{//普通图形
                                     $local_data_id = $local_data['local_data_id'];//根据图形ID查找数据源ID
                                     $idc_peak_value=get_idc_peak_value($local_data_id, strtotime($data_date . " 00:00:00"), strtotime($data_date . " 23:59:59"));
+                                    $traffic_in=$idc_peak_value['traffic_in'];
+                                    $traffic_out=$idc_peak_value['traffic_out'];
+                                    $traffic_all=array_merge($traffic_in,$traffic_out);//合并数组
+                                    rsort($traffic_all);//降序操作
                                     //出口top6
-                                    $first_data_max_out=array_shift($idc_peak_value['traffic_out']);
-                                    $second_data_max_out=array_shift($idc_peak_value['traffic_out']);
-                                    $three_data_max_out=array_shift($idc_peak_value['traffic_out']);
-                                    $fourth_data_max_out=array_shift($idc_peak_value['traffic_out']);
-                                    $five_data_max_out=array_shift($idc_peak_value['traffic_out']);
-                                    $six_data_max_out=array_shift($idc_peak_value['traffic_out']);
+                                    $first_data_max_out=array_shift($traffic_out);
+                                    $second_data_max_out=array_shift($traffic_out);
+                                    $three_data_max_out=array_shift($traffic_out);
+                                    $fourth_data_max_out=array_shift($traffic_out);
+                                    $five_data_max_out=array_shift($traffic_out);
+                                    $six_data_max_out=array_shift($traffic_out);
                                     //进口top6
-                                    $first_data_max_in=array_shift($idc_peak_value['traffic_in']);
-                                    $second_data_max_in=array_shift($idc_peak_value['traffic_in']);
-                                    $three_data_max_in=array_shift($idc_peak_value['traffic_in']);
-                                    $fourth_data_max_in=array_shift($idc_peak_value['traffic_in']);
-                                    $five_data_max_in=array_shift($idc_peak_value['traffic_in']);
-                                    $six_data_max_in=array_shift($idc_peak_value['traffic_in']);
+                                    $first_data_max_in=array_shift($traffic_in);
+                                    $second_data_max_in=array_shift($traffic_in);
+                                    $three_data_max_in=array_shift($traffic_in);
+                                    $fourth_data_max_in=array_shift($traffic_in);
+                                    $five_data_max_in=array_shift($traffic_in);
+                                    $six_data_max_in=array_shift($traffic_in);
+                                    //top6
+                                    $first_data_max=array_shift($traffic_all);
+                                    $second_data_max=array_shift($traffic_all);
+                                    $three_data_max=array_shift($traffic_all);
+                                    $fourth_data_max=array_shift($traffic_all);
+                                    $five_data_max=array_shift($traffic_all);
+                                    $six_data_max=array_shift($traffic_all);
                                 }
                                 //拼装保存数据
                                 $report_idc_statistic_detail=array();//一定要空
@@ -128,6 +153,12 @@ foreach($report_idc_statistic_array as $report_idc_statistic) {
                                 $report_idc_statistic_detail['fourth_data_max_in']=$fourth_data_max_in;
                                 $report_idc_statistic_detail['five_data_max_in']=$five_data_max_in;
                                 $report_idc_statistic_detail['six_data_max_in']=$six_data_max_in;
+                                $report_idc_statistic_detail['first_data_max']=$first_data_max;
+                                $report_idc_statistic_detail['second_data_max']=$second_data_max;
+                                $report_idc_statistic_detail['three_data_max']=$three_data_max;
+                                $report_idc_statistic_detail['fourth_data_max']=$fourth_data_max;
+                                $report_idc_statistic_detail['five_data_max']=$five_data_max;
+                                $report_idc_statistic_detail['six_data_max']=$six_data_max;
                                 $report_idc_statistic_detail['last_modified'] = date('Y-m-d H:i:s', time());
                                 //cacti_log("<<<<<<<<<<<<<<<<<<report_idc_statistic_detail>>>>>>>>>>>>>>>>>>>>>>> " . json_encode($report_idc_statistic_detail));
                                 $id=sql_save($report_idc_statistic_detail, 'plugin_report_idc_statistic_detail');

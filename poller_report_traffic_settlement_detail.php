@@ -38,6 +38,7 @@ foreach($report_traffic_settlement_array as $report_traffic_settlement) {
                                 $upper_limit=0;
                                 $data_max_out=0;
                                 $data_max_in=0;
+                                $data_max=0;
                                 if(empty($local_data)){ //说明是聚合图形
                                     $upper_limit = getUnitVal(db_fetch_cell_prepared("select upper_limit from graph_templates_graph where local_graph_id=" . $local_graph_id));
                                     $graph_data_array = array("graph_start"=>strtotime($data_date . " 00:00:00"),"graph_end"=>strtotime($data_date . " 23:59:59"),"export_csv"=>true);
@@ -62,10 +63,8 @@ foreach($report_traffic_settlement_array as $report_traffic_settlement) {
                                         rsort($traffic_out);//降序操作
                                         $data_max_out=$traffic_out[0];
                                         $data_max_in=$traffic_in[0];
+                                        $data_max=$data_max_out>=$data_max_in ? $data_max_out:$data_max_in;
                                     }
-                                    //cacti_log("聚合图形upper_limit=". json_encode($upper_limit));
-                                    //cacti_log("聚合图形data_max_out=". json_encode($data_max_out));
-                                    //cacti_log("聚合图形data_max_in=". json_encode($data_max_in));
                                 }else{//普通图形
                                     $local_data_id = $local_data['local_data_id'];//根据图形ID查找数据源ID
                                     $upper_limit = getUnitVal($local_data['upper_limit']);//根据图像ID查找数据源ID
@@ -73,6 +72,7 @@ foreach($report_traffic_settlement_array as $report_traffic_settlement) {
                                     //流量赋值
                                     $data_max_out=$traffic_max_value['traffic_out'];
                                     $data_max_in=$traffic_max_value['traffic_in'];
+                                    $data_max=$data_max_out>=$data_max_in ? $data_max_out:$data_max_in;
                                     //cacti_log("普通图形data_max_out=". json_encode($data_max_out));
                                     //cacti_log("普通图形data_max_in=". json_encode($data_max_in));
                                 }
@@ -89,6 +89,7 @@ foreach($report_traffic_settlement_array as $report_traffic_settlement) {
                                 $report_traffic_settlement_detail['data_date']=$data_date;
                                 $report_traffic_settlement_detail['data_max_out']=$data_max_out;
                                 $report_traffic_settlement_detail['data_max_in']=$data_max_in;
+                                $report_traffic_settlement_detail['data_max']=$data_max;
                                 $report_traffic_settlement_detail['last_modified'] = date('Y-m-d H:i:s', time());
                                 //cacti_log("<<<<<<<<<<<<<<<<<<<report_traffic_settlement_detail>>>>>>>>>>>>>>>>>>>>>> " . json_encode($report_traffic_settlement_detail));
                                 $id=sql_save($report_traffic_settlement_detail, 'plugin_report_traffic_settlement_detail');

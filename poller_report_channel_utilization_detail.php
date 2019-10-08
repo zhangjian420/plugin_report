@@ -38,8 +38,10 @@ foreach($report_channel_utilization_array as $report_channel_utilization) {
                                 $upper_limit=0;
                                 $data_max_out=0;
                                 $data_max_in=0;
+                                $data_max=0;
                                 $utilization_ratio_out=0;
                                 $utilization_ratio_in=0;
+                                $utilization_ratio=0;
                                 if(empty($local_data)){ //说明是聚合图形
                                     $upper_limit = getUnitVal(db_fetch_cell_prepared("select upper_limit from graph_templates_graph where local_graph_id=" . $local_graph_id));
                                     $graph_data_array = array("graph_start"=>strtotime($data_date . " 00:00:00"),"graph_end"=>strtotime($data_date . " 23:59:59"),"export_csv"=>true);
@@ -65,15 +67,14 @@ foreach($report_channel_utilization_array as $report_channel_utilization) {
                                         //流量赋值
                                         $data_max_out=$traffic_out[0];
                                         $data_max_in=$traffic_in[0];
+                                        $data_max= $data_max_out>=$data_max_in ? $data_max_out : $data_max_in;
                                         //流量利用率
                                         if($upper_limit!=0){
                                             $utilization_ratio_out= $data_max_out/$upper_limit;
                                             $utilization_ratio_in= $data_max_in/$upper_limit;
+                                            $utilization_ratio= $utilization_ratio_out>=$utilization_ratio_in ? $utilization_ratio_out : $utilization_ratio_in;
                                         }
                                     }
-                                    //cacti_log("聚合图形upper_limit=". json_encode($upper_limit));
-                                    //cacti_log("聚合图形data_max_out=". json_encode($data_max_out));
-                                    //cacti_log("聚合图形data_max_in=". json_encode($data_max_in));
                                 }else{//普通图形
                                     $local_data_id = $local_data['local_data_id'];//根据图形ID查找数据源ID
                                     $upper_limit = getUnitVal($local_data['upper_limit']);//根据图像ID查找数据源ID
@@ -81,10 +82,12 @@ foreach($report_channel_utilization_array as $report_channel_utilization) {
                                     //流量赋值
                                     $data_max_out=$traffic_max_value['traffic_out'];
                                     $data_max_in=$traffic_max_value['traffic_in'];
+                                    $data_max= $data_max_out>=$data_max_in ? $data_max_out : $data_max_in;
                                     //流量利用率
                                     if($upper_limit!=0){
                                         $utilization_ratio_out= $data_max_out/$upper_limit;
                                         $utilization_ratio_in= $data_max_in/$upper_limit;
+                                        $utilization_ratio= $utilization_ratio_out>=$utilization_ratio_in ? $utilization_ratio_out : $utilization_ratio_in;
                                     }
                                 }                                
                                 //拼装保存数据
@@ -102,6 +105,8 @@ foreach($report_channel_utilization_array as $report_channel_utilization) {
                                 $report_channel_utilization_detail['utilization_ratio_out']=$utilization_ratio_out;
                                 $report_channel_utilization_detail['data_max_in']=$data_max_in;
                                 $report_channel_utilization_detail['utilization_ratio_in']=$utilization_ratio_in;
+                                $report_channel_utilization_detail['data_max']=$data_max;
+                                $report_channel_utilization_detail['utilization_ratio']=$utilization_ratio;
                                 $report_channel_utilization_detail['last_modified'] = date('Y-m-d H:i:s', time());
                                 //cacti_log("<<<<<<<<<<<<<<<<<<<report_channel_utilization_detail>>>>>>>>>>>>>>>>>>>>>> " . json_encode($report_channel_utilization_detail));
                                 $id=sql_save($report_channel_utilization_detail, 'plugin_report_channel_utilization_detail');

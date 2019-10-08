@@ -335,8 +335,8 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
             if($report_idc_statistic['is_first_max']=='on'){
                 $x++;
                 $cellIndex=getCellIndex($x);
-                if(isset($cellData['first_data_max_out'])){
-                    $objActSheet->setCellValue($cellIndex . $y, $cellData['first_data_max_out']);
+                if(isset($cellData['first_data_max'])){
+                    $objActSheet->setCellValue($cellIndex . $y, $cellData['first_data_max']);
                 }else{
                     $objActSheet->setCellValue($cellIndex . $y, '-');
                 }
@@ -345,8 +345,8 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
             if($report_idc_statistic['is_second_max']=='on'){
                 $x++;
                 $cellIndex=getCellIndex($x);
-                if(isset($cellData['second_data_max_out'])){
-                    $objActSheet->setCellValue($cellIndex . $y, $cellData['second_data_max_out']);
+                if(isset($cellData['second_data_max'])){
+                    $objActSheet->setCellValue($cellIndex . $y, $cellData['second_data_max']);
                 }else{
                     $objActSheet->setCellValue($cellIndex . $y, '-');
                 }
@@ -355,8 +355,8 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
             if($report_idc_statistic['is_three_max']=='on'){
                 $x++;
                 $cellIndex=getCellIndex($x);
-                if(isset($cellData['three_data_max_out'])){
-                    $objActSheet->setCellValue($cellIndex . $y, $cellData['three_data_max_out']);
+                if(isset($cellData['three_data_max'])){
+                    $objActSheet->setCellValue($cellIndex . $y, $cellData['three_data_max']);
                 }else{
                     $objActSheet->setCellValue($cellIndex . $y, '-');
                 }
@@ -365,8 +365,8 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
             if($report_idc_statistic['is_fourth_max']=='on'){
                 $x++;
                 $cellIndex=getCellIndex($x);
-                if(isset($cellData['fourth_data_max_out'])){
-                    $objActSheet->setCellValue($cellIndex . $y, $cellData['fourth_data_max_out']);
+                if(isset($cellData['fourth_data_max'])){
+                    $objActSheet->setCellValue($cellIndex . $y, $cellData['fourth_data_max']);
                 }else{
                     $objActSheet->setCellValue($cellIndex . $y, '-');
                 }
@@ -567,8 +567,8 @@ function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement
                             //通道容量开始end
                             //数据开始begin
                             $cellIndex=getCellIndex($x);
-                            if(isset($cellData['data_max_out'])){
-                                $objActSheet->setCellValue($cellIndex.$y, $cellData['data_max_out']);
+                            if(isset($cellData['data_max'])){
+                                $objActSheet->setCellValue($cellIndex.$y, $cellData['data_max']);
                             }else{
                                 $objActSheet->setCellValue($cellIndex.$y, '-');
                             }
@@ -785,7 +785,7 @@ function channel_utilization_excel($report_channel_utilization,$channel_utilizat
     //     }
     // }
     // //第一层循环遍历end
-    $sql="select city_name,max(utilization_ratio_out) as utilization_ratio_out from plugin_report_channel_utilization_detail  where report_channel_utilization_id=" . $report_channel_utilization_id . " and utilization_ratio_out>=" . $utilization_ratio_threshold . "  and data_date>='" .$data_begin_date. "' and data_date<='" .$data_end_date. "' group by city_id order by utilization_ratio_out desc";
+    $sql="select city_name,max(utilization_ratio) as utilization_ratio from plugin_report_channel_utilization_detail  where report_channel_utilization_id=" . $report_channel_utilization_id . " and utilization_ratio>=" . $utilization_ratio_threshold . "  and data_date>='" .$data_begin_date. "' and data_date<='" .$data_end_date. "' group by city_id order by utilization_ratio desc";
     $data_array = db_fetch_assoc($sql);
     foreach($data_array as $data) {
 
@@ -795,7 +795,7 @@ function channel_utilization_excel($report_channel_utilization,$channel_utilizat
         $objActSheet->setCellValue('B' . $y , $data['city_name']);
         $objActSheet->getStyle('B' . $y)->applyFromArray($style_array);//设置边框样式
 
-        $objActSheet->setCellValue('C' . $y , round($data['utilization_ratio_out'],4)*100 . '%');
+        $objActSheet->setCellValue('C' . $y , round($data['utilization_ratio'],4)*100 . '%');
         $objActSheet->getStyle('C' . $y)->applyFromArray($style_array);//设置边框样式
 
         $objActSheet->getStyle('D' . $y)->applyFromArray($style_array);//设置边框样式
