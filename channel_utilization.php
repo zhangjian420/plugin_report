@@ -405,10 +405,13 @@ function channel_utilization(){
     if (get_request_var('filter') != '') {
         $sql_where =$sql_where . " AND (name LIKE '%" . get_request_var('filter') . "%')";
     }
-    $total_rows = db_fetch_cell("SELECT COUNT(*) FROM plugin_report_channel_utilization WHERE 1=1 $sql_where");
+    $sql_join = "LEFT JOIN user_auth_perms b on b.item_id = a.id and b.type = 103 and b.user_id =". $_SESSION['sess_user_id'];
+    $sql_where .= ' and b.item_id is null';
+    
+    $total_rows = db_fetch_cell("SELECT COUNT(a.*) FROM plugin_report_channel_utilization a $sql_join WHERE 1=1 $sql_where");
     $sql_order = get_order_string();
     $sql_limit = ' LIMIT ' . ($rows*(get_request_var('page')-1)) . ',' . $rows;
-    $channel_utilization_list = db_fetch_assoc("SELECT * FROM plugin_report_channel_utilization WHERE 1=1 $sql_where $sql_order $sql_limit");
+    $channel_utilization_list = db_fetch_assoc("SELECT a.* FROM plugin_report_channel_utilization a $sql_join WHERE 1=1 $sql_where $sql_order $sql_limit");
     //cacti_log("SELECT * FROM plugin_report_channel_utilization WHERE 1=1 " . $sql_where . $sql_order . $sql_limit);
     $nav = html_nav_bar('report.php?action=channel_utilization&filter=' . get_request_var('filter'), MAX_DISPLAY_PAGES, get_request_var('page'), $rows, $total_rows, 5, "宽带通道预警", 'page', 'main');
     form_start('report.php?action=channel_utilization', 'chk');//分页表单开始
