@@ -58,7 +58,8 @@ foreach($report_idc_statistic_array as $report_idc_statistic) {
                                 $six_data_max=0;
 
                                 if(empty($local_data)){ //说明是聚合图形
-                                    $graph_data_array = array("graph_start"=>strtotime($data_date . " 00:00:00"),"graph_end"=>strtotime($data_date . " 23:59:59"),"export_csv"=>true);
+                                    // $graph_data_array = array("graph_start"=>strtotime($data_date . " 00:00:00"),"graph_end"=>strtotime($data_date . " 23:59:59"),"export_csv"=>true);
+                                    $graph_data_array = array("graph_start"=>strtotime($data_date . " 00:00:00")-300,"graph_end"=>strtotime($data_date . " 23:59:59")+300,"export_csv"=>true);
                                     $xport_meta = array();
                                     $xport_array = rrdtool_function_xport($local_graph_id, 0, $graph_data_array, $xport_meta);
                                     //cacti_log("xport_array=". json_encode($xport_array));
