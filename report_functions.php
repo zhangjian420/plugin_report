@@ -204,6 +204,9 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
     if($report_idc_statistic['is_fourth_max']=='on'){
         $peak_count++;
     }
+    if($peak_count==0){//没有选中指标返回
+        return;
+    }
     $style_array = array(
         'borders' => array(
             'allborders' => array(
