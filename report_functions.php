@@ -119,9 +119,11 @@ function getUnitVal($val){
  */
 function get_tree_data($tree_id, $parent = 0) {
     $tree_array = array();
-	$heirarchy = get_allowed_tree_level($tree_id, $parent, false, 0 );//$heirarchy等级秩序
+    $heirarchy = get_allowed_tree_level($tree_id, $parent, false, 0 );//$heirarchy等级秩序
+    //cacti_log("heirarchy=". json_encode($xport_array));
 	if (cacti_sizeof($heirarchy)) {
-		foreach ($heirarchy as $leaf) {//$leaf叶子节点
+        foreach ($heirarchy as $leaf) {//$leaf叶子节点
+            $node=array();
             $node['id']= $leaf['id'];
 			if ($leaf['host_id'] > 0) {
                 $node['type']='device';
