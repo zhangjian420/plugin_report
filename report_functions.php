@@ -261,7 +261,9 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
     $objPHPExcel->getDefaultStyle()->getFont()->setName('宋体');//字体
     // 操作第一个工作表
     $objActSheet = $objPHPExcel->getActiveSheet();//获取当前活动的表
-    $objActSheet->setTitle('IDC统计('. $data_begin_date . '至' . $data_end_date . ')');
+    // $objActSheet->setTitle('IDC统计('. $data_begin_date . '至' . $data_end_date . ')');
+    //$objActSheet->setTitle($excel_name);
+    $objActSheet->setTitle('IDC统计');
     /************************************第一行操作开始*************************************/
     $objActSheet->setCellValue('A1', '');
     $objActSheet->getStyle('A1')->applyFromArray($style_array);//设置边框样式
@@ -503,9 +505,12 @@ function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement
     $objPHPExcel->getDefaultStyle()->getFont()->setName('宋体');//字体
     // 操作第一个工作表
     $objActSheet = $objPHPExcel->getActiveSheet();//获取当前活动的表
-    $objActSheet->setTitle('流量结算统计('. $data_begin_date . '至' . $data_end_date . ')');
+    // $objActSheet->setTitle('流量结算统计('. $data_begin_date . '至' . $data_end_date . ')');
+    // $objActSheet->setTitle($excel_name);
+    $objActSheet->setTitle('流量结算统计');
     /************************************第一行操作开始*************************************/
-    $objActSheet->setCellValue('A1', $report_traffic_settlement['name'] . '('. $data_begin_date . '至' . $data_end_date . ')');
+    // $objActSheet->setCellValue('A1', $report_traffic_settlement['name'] . '('. $data_begin_date . '至' . $data_end_date . ')');
+    $objActSheet->setCellValue('A1',$excel_name);
     /************************************第一行操作完成*************************************/
 
     /************************************第二行操作开始*************************************/
@@ -811,11 +816,13 @@ function channel_utilization_excel($report_channel_utilization,$channel_utilizat
     $objPHPExcel->getDefaultStyle()->getFont()->setName('宋体');//字体
     // 操作第一个工作表
     $objActSheet = $objPHPExcel->getActiveSheet();//获取当前活动的表
-    $objActSheet->setTitle('宽带通道预警('. $data_begin_date . '至' . $data_end_date . ')');
-    
+    // $objActSheet->setTitle('宽带通道预警('. $data_begin_date . '至' . $data_end_date . ')');
+    //$objActSheet->setTitle($excel_name);
+    $objActSheet->setTitle('宽带通道预警');
     /************************************第一行操作开始*************************************/
     //$objActSheet->setCellValue('A1', $report_channel_utilization['name'] . '('. $data_begin_date . '至' . $data_end_date . ')');
-    $objActSheet->setCellValue('A1', '宽带通道预警' . '('. $data_begin_date . '至' . $data_end_date . ')');
+    //$objActSheet->setCellValue('A1', '宽带通道预警' . '('. $data_begin_date . '至' . $data_end_date . ')');
+    $objActSheet->setCellValue('A1', $excel_name);
     /************************************第一行操作完成*************************************/
 
     /************************************第二行操作开始*************************************/
