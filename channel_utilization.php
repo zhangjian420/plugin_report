@@ -282,6 +282,7 @@ function channel_utilization_save(){
         $id=sql_save($save, 'plugin_report_channel_utilization');
         if ($id) {
             raise_message(1);
+            cacti_logdb((empty(get_filter_request_var('id'))? "添加宽带通道预警报表" : "修改宽带通道预警报表").$save['name']);
             header('Location: report.php?action=channel_utilization');
             exit;
         } else {

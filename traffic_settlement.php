@@ -272,6 +272,7 @@ function traffic_settlement_save(){
         $id=sql_save($save, 'plugin_report_traffic_settlement');
         if ($id) {
             raise_message(1);
+            cacti_logdb((empty(get_filter_request_var('id'))? "添加流量结算统计报表" : "修改流量结算统计报表").$save['name']);
             header('Location: report.php?action=traffic_settlement');
             exit;
         } else {

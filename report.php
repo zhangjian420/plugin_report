@@ -118,6 +118,7 @@ function form_actions() {
 					db_execute('DELETE FROM plugin_report_traffic_settlement WHERE ' . array_to_sql_or($selected_items, 'id'));
 					db_execute('DELETE FROM plugin_report_traffic_settlement_detail WHERE ' . array_to_sql_or($selected_items, 'report_traffic_settlement_id'));
 					db_execute('DELETE FROM plugin_report_traffic_settlement_excel WHERE ' . array_to_sql_or($selected_items, 'report_traffic_settlement_id'));
+				    cacti_logdb("删除流量结算统计报表");
 				}
 			}
 			header('Location: report.php?action=traffic_settlement&header=false');
@@ -212,6 +213,7 @@ function form_actions() {
 					db_execute('DELETE FROM plugin_report_idc_statistic WHERE ' . array_to_sql_or($selected_items, 'id'));
 					db_execute('DELETE FROM plugin_report_idc_statistic_detail WHERE ' . array_to_sql_or($selected_items, 'report_idc_statistic_id'));
 					db_execute('DELETE FROM plugin_report_idc_statistic_excel WHERE ' . array_to_sql_or($selected_items, 'report_idc_statistic_id'));
+					cacti_logdb("删除IDC统计报表");
 				}
 			}
 			header('Location: report.php?action=idc_statistic&header=false');
@@ -305,6 +307,7 @@ function form_actions() {
 					db_execute('DELETE FROM plugin_report_channel_utilization WHERE ' . array_to_sql_or($selected_items, 'id'));
 					db_execute('DELETE FROM plugin_report_channel_utilization_detail WHERE ' . array_to_sql_or($selected_items, 'report_channel_utilization_id'));
 					db_execute('DELETE FROM plugin_report_channel_utilization_excel WHERE ' . array_to_sql_or($selected_items, 'report_channel_utilization_id'));
+					cacti_logdb("删除宽带通道预警报表");
 				}
 			}
 			header('Location: report.php?action=channel_utilization&header=false');

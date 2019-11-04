@@ -38,7 +38,14 @@ function plugin_report_check_config() {
  */
 function report_show_tab() {
     global $config;
-    print '<a href="' . $config['url_path'] . 'plugins/report/report.php"><img src="' . $config['url_path'] . 'plugins/monitor/images/tab_monitor.gif" alt="报表管理"></a>';
+
+    if (api_user_realm_auth('report.php')) {
+        if (substr_count($_SERVER['REQUEST_URI'], 'report.php')) {
+            print '<a href="' . $config['url_path'] . 'plugins/report/report.php"><img src="' . $config['url_path'] . 'plugins/monitor/images/tab_monitor_down.gif" alt="报表管理"></a>';
+        } else {
+            print '<a href="' . $config['url_path'] . 'plugins/report/report.php"><img src="' . $config['url_path'] . 'plugins/monitor/images/tab_monitor.gif" alt="报表管理"></a>';
+        }
+    }
 }
 /**
  * 面包屑

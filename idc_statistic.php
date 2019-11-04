@@ -299,6 +299,7 @@ function idc_statistic_save(){
         $id=sql_save($save, 'plugin_report_idc_statistic');
         if ($id) {
             raise_message(1);
+            cacti_logdb((empty(get_filter_request_var('id'))? "添加IDC统计报表" : "修改IDC统计报表").$save['name']);
             header('Location: report.php?action=idc_statistic');
             exit;
         } else {
