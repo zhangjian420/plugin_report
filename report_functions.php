@@ -119,9 +119,11 @@ function getUnitVal($val){
  */
 function get_tree_data($tree_id, $parent = 0) {
     $tree_array = array();
-	$heirarchy = get_allowed_tree_level($tree_id, $parent, false, 0 );//$heirarchy等级秩序
+    $heirarchy = get_allowed_tree_level($tree_id, $parent, false, 0 );//$heirarchy等级秩序
+    //cacti_log("heirarchy=". json_encode($xport_array));
 	if (cacti_sizeof($heirarchy)) {
-		foreach ($heirarchy as $leaf) {//$leaf叶子节点
+        foreach ($heirarchy as $leaf) {//$leaf叶子节点
+            $node=array();
             $node['id']= $leaf['id'];
 			if ($leaf['host_id'] > 0) {
                 $node['type']='device';
@@ -182,9 +184,25 @@ function getCellIndex($index){
  */
 function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_begin_date,$data_end_date){
     $report_idc_statistic_id=$report_idc_statistic['id'];
-    $excel_name=$report_idc_statistic['name'] . '-';
-    $excel_name=$excel_name . ('IDC统计报表(' . $data_begin_date . '至' . $data_end_date . ')');
     $excel_type=$idc_statistic_type;//excel类型
+    // $excel_name=$report_idc_statistic['name'] . '-';
+    // $excel_name=$excel_name . ('IDC统计报表(' . $data_begin_date . '至' . $data_end_date . ')');
+    $excel_name=$report_idc_statistic['name'] . '-';
+    if($excel_type=='手工统计'){
+        $excel_name=$excel_name . ('IDC统计(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='实时统计'){
+        $excel_name=$excel_name . ('IDC统计(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='日统计'){
+        $excel_name=$excel_name . ('IDC统计日报(' . $data_end_date . ')');
+    }
+    if($excel_type=='周统计'){
+        $excel_name=$excel_name . ('IDC统计周报(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='月统计'){
+        $excel_name=$excel_name . ('IDC统计月报(' . date('Y年m月', strtotime($data_end_date)) . ')');
+    }
     $report_idc_statistic_excel= db_fetch_row_prepared("SELECT * FROM plugin_report_idc_statistic_excel WHERE report_idc_statistic_id=" . $report_idc_statistic_id ." and excel_name = '" . $excel_name . "' and excel_type = '" . $excel_type . "'");
     if(isset($report_idc_statistic_excel['id'])&&$report_idc_statistic_excel['excel_type']!='手工统计'){//数据库中已经存在记录
         return;
@@ -245,7 +263,9 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
     $objPHPExcel->getDefaultStyle()->getFont()->setName('宋体');//字体
     // 操作第一个工作表
     $objActSheet = $objPHPExcel->getActiveSheet();//获取当前活动的表
-    $objActSheet->setTitle('IDC统计报表('. $data_begin_date . '至' . $data_end_date . ')');
+    // $objActSheet->setTitle('IDC统计('. $data_begin_date . '至' . $data_end_date . ')');
+    //$objActSheet->setTitle($excel_name);
+    $objActSheet->setTitle('IDC统计');
     /************************************第一行操作开始*************************************/
     $objActSheet->setCellValue('A1', '');
     $objActSheet->getStyle('A1')->applyFromArray($style_array);//设置边框样式
@@ -443,9 +463,25 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
  */
 function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement_type,$data_begin_date,$data_end_date){
     $report_traffic_settlement_id=$report_traffic_settlement['id'];
-    $excel_name=$report_traffic_settlement['name'] . '-';
-    $excel_name=$excel_name . ('流量结算统计报表(' . $data_begin_date . '至' . $data_end_date . ')');
     $excel_type=$traffic_settlement_type;//excel类型
+    // $excel_name=$report_traffic_settlement['name'] . '-';
+    // $excel_name=$excel_name . ('流量结算统计(' . $data_begin_date . '至' . $data_end_date . ')');
+    $excel_name=$report_traffic_settlement['name'] . '-';
+    if($excel_type=='手工统计'){
+        $excel_name=$excel_name . ('流量结算统计(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='实时统计'){
+        $excel_name=$excel_name . ('流量结算统计(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='日统计'){
+        $excel_name=$excel_name . ('流量结算统计日报(' . $data_end_date . ')');
+    }
+    if($excel_type=='周统计'){
+        $excel_name=$excel_name . ('流量结算统计周报(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='月统计'){
+        $excel_name=$excel_name . ('流量结算统计月报(' . date('Y年m月', strtotime($data_end_date)) . ')');
+    }
     $report_traffic_settlement_excel= db_fetch_row_prepared("SELECT * FROM plugin_report_traffic_settlement_excel WHERE report_traffic_settlement_id=" . $report_traffic_settlement_id . " and excel_name = '" . $excel_name . "' and excel_type = '" . $excel_type . "'");
     if(isset($report_traffic_settlement_excel['id'])&&$report_traffic_settlement_excel['excel_type']!='手工统计'){//数据库中已经存在记录
        return;
@@ -471,9 +507,12 @@ function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement
     $objPHPExcel->getDefaultStyle()->getFont()->setName('宋体');//字体
     // 操作第一个工作表
     $objActSheet = $objPHPExcel->getActiveSheet();//获取当前活动的表
-    $objActSheet->setTitle('流量结算统计报表('. $data_begin_date . '至' . $data_end_date . ')');
+    // $objActSheet->setTitle('流量结算统计('. $data_begin_date . '至' . $data_end_date . ')');
+    // $objActSheet->setTitle($excel_name);
+    $objActSheet->setTitle('流量结算统计');
     /************************************第一行操作开始*************************************/
-    $objActSheet->setCellValue('A1', $report_traffic_settlement['name'] . '('. $data_begin_date . '至' . $data_end_date . ')');
+    // $objActSheet->setCellValue('A1', $report_traffic_settlement['name'] . '('. $data_begin_date . '至' . $data_end_date . ')');
+    $objActSheet->setCellValue('A1',$excel_name);
     /************************************第一行操作完成*************************************/
 
     /************************************第二行操作开始*************************************/
@@ -630,12 +669,20 @@ function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement
     $objActSheet->setCellValue('C' .$y, '');
     $objActSheet->getStyle('C' .$y)->applyFromArray($style_array_total);
     $objActSheet->setCellValue( 'D'.$y, '=SUM(D4:D'.($y-1).')' );//通道容量总计
+    //利用公式求值在赋值beign
+    $calculatedValue=$objActSheet->getCell('D'.$y)->getCalculatedValue();//求值计算
+    $objActSheet->setCellValue('D'.$y, $calculatedValue);
+    //利用公式求值在赋值end
     $objActSheet->getStyle('D' .$y)->applyFromArray($style_array_total);
     //数据统计开始
     $x=4;
     for($cell_date=strtotime($data_begin_date);$cell_date<=strtotime($data_end_date); $cell_date+= 86400) {
         $cellIndex=getCellIndex($x);
         $objActSheet->setCellValue($cellIndex . $y, '=SUM('.$cellIndex.'4:'. $cellIndex.($y-1).')');
+        //利用公式求值在赋值beign
+        $calculatedValue=$objActSheet->getCell($cellIndex . $y)->getCalculatedValue();//求值计算
+        $objActSheet->setCellValue($cellIndex . $y, $calculatedValue);
+        //利用公式求值在赋值end
         $objActSheet->getStyle($cellIndex.$y)->applyFromArray($style_array_total);
         $x++;
     }
@@ -713,10 +760,26 @@ function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement
  */
 function channel_utilization_excel($report_channel_utilization,$channel_utilization_type,$data_begin_date,$data_end_date){
     $report_channel_utilization_id=$report_channel_utilization['id'];//主键ID
-    $utilization_ratio_threshold=$report_channel_utilization['utilization_ratio_threshold'];//利用率阈值(%)
-    $excel_name=$report_channel_utilization['name'] . '-';
-    $excel_name=$excel_name . ('宽带通道预警报表(' . $data_begin_date . '至' . $data_end_date . ')');
     $excel_type=$channel_utilization_type;//excel类型
+    $utilization_ratio_threshold=$report_channel_utilization['utilization_ratio_threshold'];//利用率阈值(%)
+    // $excel_name=$report_channel_utilization['name'] . '-';
+    // $excel_name=$excel_name . ('宽带通道预警报表(' . $data_begin_date . '至' . $data_end_date . ')');
+    $excel_name=$report_channel_utilization['name'] . '-';
+    if($excel_type=='手工统计'){
+        $excel_name=$excel_name . ('宽带通道预警(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='实时统计'){
+        $excel_name=$excel_name . ('宽带通道预警(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='日统计'){
+        $excel_name=$excel_name . ('宽带通道预警日报(' . $data_end_date . ')');
+    }
+    if($excel_type=='周统计'){
+        $excel_name=$excel_name . ('宽带通道预警周报(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='月统计'){
+        $excel_name=$excel_name . ('宽带通道预警月报(' . date('Y年m月', strtotime($data_end_date)) . ')');
+    }
     $report_channel_utilization_excel= db_fetch_row_prepared("SELECT * FROM plugin_report_channel_utilization_excel WHERE report_channel_utilization_id=" . $report_channel_utilization_id . " and excel_name = '" . $excel_name . "' and excel_type = '" . $excel_type . "'");
     if(isset($report_channel_utilization_excel['id'])&&$report_channel_utilization_excel['excel_type']!='手工统计'){//数据库中已经存在记录
         return;
@@ -755,10 +818,13 @@ function channel_utilization_excel($report_channel_utilization,$channel_utilizat
     $objPHPExcel->getDefaultStyle()->getFont()->setName('宋体');//字体
     // 操作第一个工作表
     $objActSheet = $objPHPExcel->getActiveSheet();//获取当前活动的表
-    $objActSheet->setTitle('宽带通道预警报表('. $data_begin_date . '至' . $data_end_date . ')');
-    
+    // $objActSheet->setTitle('宽带通道预警('. $data_begin_date . '至' . $data_end_date . ')');
+    //$objActSheet->setTitle($excel_name);
+    $objActSheet->setTitle('宽带通道预警');
     /************************************第一行操作开始*************************************/
-    $objActSheet->setCellValue('A1', $report_channel_utilization['name'] . '('. $data_begin_date . '至' . $data_end_date . ')');
+    //$objActSheet->setCellValue('A1', $report_channel_utilization['name'] . '('. $data_begin_date . '至' . $data_end_date . ')');
+    //$objActSheet->setCellValue('A1', '宽带通道预警' . '('. $data_begin_date . '至' . $data_end_date . ')');
+    $objActSheet->setCellValue('A1', $excel_name);
     /************************************第一行操作完成*************************************/
 
     /************************************第二行操作开始*************************************/
