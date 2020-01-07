@@ -8,37 +8,37 @@ include_once($config['base_path'] . '/plugins/report/report_functions.php');//�
 $report_traffic_settlement_array = db_fetch_assoc("select * from plugin_report_traffic_settlement where status_detail!='已执行'");
 //遍历集合begin
 foreach($report_traffic_settlement_array as $report_traffic_settlement) {
-    $report_traffic_settlement_id=$report_traffic_settlement['id'];//流量结算ID
+    $report_traffic_settlement_id = $report_traffic_settlement['id'];//流量结算ID
     $begin_date=$report_traffic_settlement['begin_date'];//开始日期
     $current_date=date('Y-m-d', time());//今天
     $extension=json_decode($report_traffic_settlement['extension'],true);//将json字符串转为对象
     $datas_checked=$extension['datas_checked'];//报表配置data
+    $date_array = array();
+    if( strtotime($current_date)>strtotime($begin_date)){//表示已经过期
+        $date_array = getDateFromRange($begin_date,date('Y-m-d',(strtotime($current_date)-86400)));//今天没有过完，只能统计前一天的数据
+    }
     //第一层数据遍历begin
     foreach ($datas_checked as $firstData){//第一层地区数据
         if(isset($firstData['checked'])&&$firstData['checked']){//区县是否选中状态
-            $region_id=$firstData['id'];//地区ID
-            $region_name=$firstData['text'];//地区名称
+            $region_id = $firstData['id'];//地区ID
+            $region_name = $firstData['text'];//地区名称
             if(isset($firstData['children'])){
                 //第二层数据遍历begin
                 foreach ($firstData['children'] as $secondtData){//遍历图形data
-                    if(isset($secondtData['local_graph_id'])&&isset($secondtData['checked'])&&$secondtData['checked']){
-                        $city_id=$secondtData['id'];//城市ID
-                        $city_name=$secondtData['text'];//城市名称
-                        $date_array = array();
-                        if( strtotime($current_date)>strtotime($begin_date)){//表示已经过期
-                            $date_array = getDateFromRange($begin_date,date('Y-m-d',(strtotime($current_date)-86400)));//今天没有过完，只能统计前一天的数据
-                        }
+                    if(isset($secondtData['local_graph_id']) && isset($secondtData['checked']) && $secondtData['checked']){
+                        $city_id = $secondtData['id'];//城市ID
+                        $city_name = $secondtData['text'];//城市名称
                         //日期集合遍历begin
                         foreach ($date_array as $data_date){
                             $traffic_settlement_detail_id = db_fetch_cell_prepared("select id from plugin_report_traffic_settlement_detail where report_traffic_settlement_id=" . $report_traffic_settlement_id . " and region_id=" . $region_id . " and city_id=" . $city_id . " and data_date='" . $data_date ."'");
                             if($traffic_settlement_detail_id==''){//为空
-                                $local_graph_id=$secondtData['local_graph_id'];//图形ID
-                                $local_data=get_local_data($secondtData['local_graph_id']);//根据图形ID查找数据源ID
+                                $local_graph_id = $secondtData['local_graph_id'];//图形ID
+                                $local_data = get_local_data($secondtData['local_graph_id']);//根据图形ID查找数据源ID
                                 $local_data_id = 0;
-                                $upper_limit=0;
-                                $data_max_out=0;
-                                $data_max_in=0;
-                                $data_max=0;
+                                $upper_limit = 0;
+                                $data_max_out = 0;
+                                $data_max_in = 0;
+                                $data_max = 0;
                                 if(empty($local_data)){ //说明是聚合图形
                                     $upper_limit = getUnitVal(db_fetch_cell_prepared("select upper_limit from graph_templates_graph where local_graph_id=" . $local_graph_id));
                                     // $graph_data_array = array("graph_start"=>strtotime($data_date . " 00:00:00"),"graph_end"=>strtotime($data_date . " 23:59:59"),"export_csv"=>true);

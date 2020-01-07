@@ -19,7 +19,8 @@ foreach($report_channel_utilization_array as $report_channel_utilization) {
         //cacti_log('======================有效期内的流量结算报表统计邮箱发送操作======================');
         //日统计操作begin
         if($is_day=='on'){
-            $data_begin_date=$begin_date;
+            //$data_begin_date=$begin_date;
+            $data_begin_date=date('Y-m-d',strtotime("-2 day",strtotime($current_date)));//统计前两天的
             $data_end_date=date('Y-m-d',strtotime("-1 day",strtotime($current_date)));//统计前一天的
             //cacti_log('日统计data_end_date=' . $data_end_date);
             //cacti_log('日统计data_begin_date=' . $data_begin_date);
