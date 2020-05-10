@@ -1,7 +1,7 @@
 <?php
 $guest_account=true;
+
 chdir('../../');
-include_once('./include/global.php');
 include_once('./include/auth.php');
 include_once($config['base_path'] . '/lib/rrd.php');
 include_once($config['base_path'] . '/plugins/report/phpexcel/PHPExcel.php');//PHPExcel函数文件
@@ -9,6 +9,7 @@ include_once($config['base_path'] . '/plugins/report/report_functions.php');//�
 include_once($config['base_path'] . '/plugins/report/traffic_settlement.php');//流量结算统计
 include_once($config['base_path'] . '/plugins/report/idc_statistic.php');//IDC统计
 include_once($config['base_path'] . '/plugins/report/channel_utilization.php');//宽带通道预警
+
 switch(get_request_var('action')) {
 	case 'ajax_tree'://ajax得到tree请求数据
         ajax_tree();
@@ -89,6 +90,8 @@ switch(get_request_var('action')) {
         bottom_footer();
 		break;
 }
+exit;
+
 /**
  * ajax得到tree请求数据
  */
@@ -476,4 +479,3 @@ function form_actions() {
 	}
 	/***********************宽带通道预警导出操作end ************************/
 }
-?>

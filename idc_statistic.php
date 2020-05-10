@@ -506,7 +506,9 @@ function idc_statistic_import(){
         foreach ($report_idc_statistic_excel_array as $report_idc_statistic_excel){
             print "<tr>
                         <td class='textArea' style='padding-left: 40px;padding-bottom: 15px;' class='odd'>
-                            <div class='itemlist'><a target='_blank' href='" . $config['url_path'] . $report_idc_statistic_excel['excel_path'] . "' download='" . $report_idc_statistic_excel['excel_name'] . "'>" . html_escape($report_idc_statistic_excel['excel_name']) . "</a><div>
+                            <div class='itemlist'>
+                                <a target='_blank' href='" . $config['url_path'] . $report_idc_statistic_excel['excel_path'] . "' download='" . $report_idc_statistic_excel['excel_name'] . "'>" . html_escape($report_idc_statistic_excel['excel_name']) . "</a>
+                            </div>
                         </td>
                    </tr>\n";
                 

@@ -151,8 +151,8 @@ function get_tree_data($tree_id, $parent = 0) {
 }
 /**
  * 获取指定日期段内每一天的日期
- * @param  Date  $begin_date 开始日期
- * @param  Date  $end_date   结束日期
+ * @param  $begin_date 
+ * @param  $end_date   
  * @return Array
  */
 function getDateFromRange($begin_date, $end_date){

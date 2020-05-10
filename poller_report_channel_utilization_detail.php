@@ -30,8 +30,11 @@ foreach($report_channel_utilization_array as $report_channel_utilization) {
                         }
                         //日期集合遍历begin
                         foreach ($date_array as $data_date){
-                            $channel_utilization_detail_id = db_fetch_cell_prepared("select id from plugin_report_channel_utilization_detail where report_channel_utilization_id=" . $report_channel_utilization_id . " and region_id=" . $region_id . " and city_id=" . $city_id . " and data_date='" . $data_date ."'");
-                            if($channel_utilization_detail_id==''){//为空
+                            $channel_utilization_detail_id = db_fetch_cell_prepared("select id from plugin_report_channel_utilization_detail where 
+                                report_channel_utilization_id=" . $report_channel_utilization_id . " and region_id=" . $region_id 
+                                . " and city_id=" . $city_id . " and data_date='" . $data_date ."'");
+                            
+                            if($channel_utilization_detail_id==''){ // 为空，说明这个报表这个时间内没有统计过，需要统计
                                 $local_graph_id=$secondtData['local_graph_id'];//图形ID
                                 $local_data=get_local_data($secondtData['local_graph_id']);//根据图形ID查找数据源ID
                                 $local_data_id = 0;
@@ -55,10 +58,6 @@ foreach($report_channel_utilization_array as $report_channel_utilization) {
                                         foreach ($xport_array["data"] as $data){
                                             $datas = array_values($data);
                                             if(cacti_sizeof($datas)>=2){
-                                                // $traffic_in[]=getUnitVal($datas[0]);//统计所有项目配置时候使用
-                                                // $traffic_out[]=getUnitVal($datas[2]);
-                                                // $traffic_in[]=getUnitVal($datas[4]);
-                                                // $traffic_out[]=getUnitVal($datas[6]);
                                                 $traffic_in[]=getUnitVal($datas[sizeof($datas)-2]);
                                                 $traffic_out[]=getUnitVal(end($datas));
                                             }
