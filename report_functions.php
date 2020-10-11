@@ -6,7 +6,8 @@ function report_tabs($current_tab='traffic') {
 	$tabs = array(
 		'traffic_settlement'    => __('流量结算统计', 'report'),
         'idc_statistic'=> __('IDC统计', 'report'),
-        'channel_utilization'=> __('宽带通道预警', 'report')
+        'channel_utilization'=> __('宽带通道预警', 'report'),
+        'traffic_detail'=> __('流量明细统计', 'report')
 	);
 	$tabs = api_plugin_hook_function('report_tabs', $tabs);//资产管理table
 	get_filter_request_var('tab', FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => '/^([a-zA-Z]+)$/')));
@@ -37,6 +38,7 @@ function get_local_data($local_graph_id){
                                         where gl.id =? limit 1',array($local_graph_id));
     return $graph_local;
 }
+
 /**
  * 根据图形ID与开始结束时间得到当前图形最大的出口与入口流量
  * 返回的格式： 单位是bit
@@ -209,6 +211,9 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
      }
     $extension=json_decode($report_idc_statistic['extension'],true);//将json字符串转为对象
     $datas_checked=$extension['datas_checked'];//报表配置data
+    if (empty($datas_checked)) {
+        return ;
+    }
     $peak_count=0;
     if($report_idc_statistic['is_first_max']=='on'){
         $peak_count++;
@@ -458,8 +463,8 @@ function idc_statistic_excel($report_idc_statistic,$idc_statistic_type,$data_beg
     sql_save($report_idc_statistic_excel, 'plugin_report_idc_statistic_excel');
     /************************************发送邮件end*************************************/
 }
-/*
- *流量结算统计导出excel
+/**
+ * 流量结算统计导出excel
  */
 function traffic_settlement_excel($report_traffic_settlement,$traffic_settlement_type,$data_begin_date,$data_end_date){
     $report_traffic_settlement_id=$report_traffic_settlement['id'];
@@ -943,5 +948,120 @@ function channel_utilization_excel($report_channel_utilization,$channel_utilizat
     $report_channel_utilization_excel['description']=$excel_name;
     $report_channel_utilization_excel['last_modified'] = date('Y-m-d H:i:s', time());
     sql_save($report_channel_utilization_excel, 'plugin_report_channel_utilization_excel');
+    /************************************发送邮件end*************************************/
+}
+
+/**
+ * 流量明细统计 excel统计
+ */
+function traffic_detail_excel($report_traffic_detail,$traffic_detail_type,$data_begin_date,$data_end_date){
+    $report_traffic_detail_id=$report_traffic_detail['id'];//主键ID
+    $excel_type=$traffic_detail_type;//excel类型
+    // $excel_name=$report_traffic_detail['name'] . '-';
+    // $excel_name=$excel_name . ('流量明细统计报表(' . $data_begin_date . '至' . $data_end_date . ')');
+    $excel_name=$report_traffic_detail['name'] . '-';
+    if($excel_type=='手工统计'){
+        $excel_name=$excel_name . ('流量明细统计(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='实时统计'){
+        $excel_name=$excel_name . ('流量明细统计(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='日统计'){
+        $excel_name=$excel_name . ('流量明细统计日报(' . $data_end_date . ')');
+    }
+    if($excel_type=='周统计'){
+        $excel_name=$excel_name . ('流量明细统计周报(' . $data_begin_date . '至' . $data_end_date . ')');
+    }
+    if($excel_type=='月统计'){
+        $excel_name=$excel_name . ('流量明细统计月报(' . date('Y年m月', strtotime($data_end_date)) . ')');
+    }
+    // 查询是不是生成过
+    $report_traffic_detail_excel= db_fetch_row_prepared("SELECT * FROM plugin_report_traffic_detail_excel WHERE report_traffic_detail_id=" . $report_traffic_detail_id . " and excel_name = '" . $excel_name . "' and excel_type = '" . $excel_type . "'");
+    if(isset($report_traffic_detail_excel['id'])&&$report_traffic_detail_excel['excel_type']!='手工统计'){//数据库中已经存在记录
+        return;
+    }
+    $objReader = PHPExcel_IOFactory::createReader('Excel2007');//创建一个读Excel模版的对象
+    $objPHPExcel = $objReader->load (dirname(__FILE__) . "/templates/traffic_detail.xlsx" );//获取模版
+    $objPHPExcel->getDefaultStyle()->getFont()->setName('宋体');//字体
+    
+    
+    $sql="select city_name,local_graph_id,datas from plugin_report_traffic_detail_detail  where report_traffic_detail_id=" . $report_traffic_detail_id . "  and data_date>='" .$data_begin_date. "' and data_date<='" .$data_end_date. "' order by city_id, data_date";
+    cacti_log($sql);
+    $data_array = db_fetch_assoc($sql);
+    $index_array = array();
+    foreach($data_array as $data) {
+        $title = $data["city_name"];
+        $sheet_name = $data["local_graph_id"];
+        $datas = json_decode($data["datas"]);
+        if($objPHPExcel->sheetNameExists($sheet_name)){
+            $sheet = $objPHPExcel->getSheetByName($sheet_name);
+        }else{
+            $sheet = $objPHPExcel->createSheet();
+            $sheet->setTitle($sheet_name);
+            $sheet->setCellValue('A1', $title);
+            $sheet->setCellValue('A2', "序号");
+            $sheet->setCellValue('B2', "时间");
+            $sheet->setCellValue('C2', "流量（G）");
+            
+        }
+        foreach ($datas as $key => $value){
+            if (array_key_exists($sheet_name, $index_array)) {
+                $index_array[$sheet_name] = $index_array[$sheet_name] + 1;
+            }else{
+                $index_array[$sheet_name] = 1;
+            }
+            $sheet->setCellValue("A".($index_array[$sheet_name]+2),$index_array[$sheet_name]);
+            $sheet->setCellValue("B".($index_array[$sheet_name]+2),date('Y-m-d H:i', $key));
+            $sheet->setCellValue("C".($index_array[$sheet_name]+2),$value);
+        }
+    }
+    $objPHPExcel->removeSheetByIndex(0); // 删除第一个不用的
+    /************************************保存excel begin*************************************/
+    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+    $path='plugins/report/excel/traffic_detail/' . $excel_name . '.xlsx';
+    $objWriter->save(dirname(__FILE__) . '/excel/traffic_detail/' . $excel_name . '.xlsx');
+    /************************************保存excel end*************************************/
+    
+    /************************************发送邮件begin*************************************/
+    $report_traffic_detail_excel['report_traffic_detail_id']=$report_traffic_detail['id'];
+    $report_traffic_detail_excel['excel_name']=$excel_name;
+    $report_traffic_detail_excel['excel_type']=$excel_type;
+    $report_traffic_detail_excel['excel_path']=$path;
+    if($report_traffic_detail_excel['excel_type']!='实时统计'&&$report_traffic_detail_excel['excel_type']!='手动统计'){//实时统计不需要发送邮件
+        if($excel_type=='日统计'){
+            $report_traffic_detail['emails']=$report_traffic_detail['emails_day'];
+        }
+        if($excel_type=='周统计'){
+            $report_traffic_detail['emails']=$report_traffic_detail['emails_week'];
+        }
+        if($excel_type=='月统计'){
+            $report_traffic_detail['emails']=$report_traffic_detail['emails_month'];
+        }
+        if(isset($report_traffic_detail['emails'])){
+            $msg='<h3>' .$excel_name . '</h3>';
+            //$msg=$msg .'<br>';
+            //$msg=$msg . '<a>http://106.13.81.220/cacti/'. $path .'</a>';
+            $report_traffic_detail_excel['subject']=$excel_name;
+            $report_traffic_detail_excel['body']=$msg;
+            $report_traffic_detail_excel['to_emails']=$report_traffic_detail['emails'];
+            //附件begin
+            $attachments=array();
+            $attachment=array();
+            $attachment['attachment']=$path;
+            $attachment['filename']=$excel_name . '.xlsx';
+            $attachment['mime_type']='xlsx';
+            $attachments[$excel_name]= $attachment;
+            //附近end
+            $errors = send_mail($report_traffic_detail['emails'],"",$excel_name,$msg,$attachments,"",true);
+            if($errors == ''){
+                $report_traffic_detail_excel['status']='邮件发送成功';
+            }else{
+                $report_traffic_detail_excel['status']='邮件发送失败';
+            }
+        }
+    }
+    $report_traffic_detail_excel['description']=$excel_name;
+    $report_traffic_detail_excel['last_modified'] = date('Y-m-d H:i:s', time());
+    sql_save($report_traffic_detail_excel, 'plugin_report_traffic_detail_excel');
     /************************************发送邮件end*************************************/
 }

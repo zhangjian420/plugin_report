@@ -9,10 +9,13 @@ $report_idc_statistic_array = db_fetch_assoc("select * from plugin_report_idc_st
 //遍历集合begin
 foreach($report_idc_statistic_array as $report_idc_statistic) {
     $report_idc_statistic_id=$report_idc_statistic['id'];//IDC统计ID
-    $begin_date=$report_idc_statistic['begin_date'];//开始日期
+    $begin_date=$report_idc_statistic['exec_date'];//开始日期--之前是begin_date，后面改成exec_date了
     $current_date=date('Y-m-d', time());//今天
     $extension=json_decode($report_idc_statistic['extension'],true);//将json字符串转为对象
     $datas_checked=$extension['datas_checked'];//报表配置data
+    if (empty($datas_checked)) {
+        continue;
+    }
     //第一层数据遍历begin
     foreach ($datas_checked as $firstData){//第一层地区数据
         if(isset($firstData['checked'])&&$firstData['checked']){//区县是否选中状态
@@ -162,13 +165,7 @@ foreach($report_idc_statistic_array as $report_idc_statistic) {
                                 $report_idc_statistic_detail['six_data_max']=$six_data_max;
                                 $report_idc_statistic_detail['last_modified'] = date('Y-m-d H:i:s', time());
                                 //cacti_log("<<<<<<<<<<<<<<<<<<report_idc_statistic_detail>>>>>>>>>>>>>>>>>>>>>>> " . json_encode($report_idc_statistic_detail));
-                                $id=sql_save($report_idc_statistic_detail, 'plugin_report_idc_statistic_detail');
-                                //报表状态
-                                $save_report_idc_statistic=array();//一定要空
-                                $save_report_idc_statistic['id']=$report_idc_statistic_id;
-                                $save_report_idc_statistic['status_detail']='执行中';
-                                $save_report_idc_statistic['last_modified'] = date('Y-m-d H:i:s', time());
-                                $id=sql_save($save_report_idc_statistic, 'plugin_report_idc_statistic');
+                                sql_save($report_idc_statistic_detail, 'plugin_report_idc_statistic_detail');
                             }
                         }
                         //日期集合遍历end
@@ -179,5 +176,13 @@ foreach($report_idc_statistic_array as $report_idc_statistic) {
         }
     }
     //第一层数据遍历end
+    //报表状态
+    $save_report_idc_statistic=array();//一定要空
+    $save_report_idc_statistic['id']=$report_idc_statistic_id;
+    $save_report_idc_statistic['status_detail']='执行中';
+    $save_report_idc_statistic['last_modified'] = date('Y-m-d H:i:s', time());
+    // 把开始时间更新了，不然每次都是从创建时间开始算，时间久了效率越来越低
+    $save_report_idc_statistic['exec_date'] = date('Y-m-d', time()-86400);
+    sql_save($save_report_idc_statistic, 'plugin_report_idc_statistic');
 }
 //遍历集合end

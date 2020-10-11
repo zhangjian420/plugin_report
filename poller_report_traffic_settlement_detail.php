@@ -9,7 +9,7 @@ $report_traffic_settlement_array = db_fetch_assoc("select * from plugin_report_t
 //遍历集合begin
 foreach($report_traffic_settlement_array as $report_traffic_settlement) {
     $report_traffic_settlement_id = $report_traffic_settlement['id'];//流量结算ID
-    $begin_date=$report_traffic_settlement['begin_date'];//开始日期
+    $begin_date=$report_traffic_settlement['exec_date'];//开始日期--之前是begin_date，后面改成exec_date了
     $current_date=date('Y-m-d', time());//今天
     $extension=json_decode($report_traffic_settlement['extension'],true);//将json字符串转为对象
     $datas_checked=$extension['datas_checked'];//报表配置data
@@ -93,13 +93,7 @@ foreach($report_traffic_settlement_array as $report_traffic_settlement) {
                                 $report_traffic_settlement_detail['data_max']=$data_max;
                                 $report_traffic_settlement_detail['last_modified'] = date('Y-m-d H:i:s', time());
                                 //cacti_log("<<<<<<<<<<<<<<<<<<<report_traffic_settlement_detail>>>>>>>>>>>>>>>>>>>>>> " . json_encode($report_traffic_settlement_detail));
-                                $id=sql_save($report_traffic_settlement_detail, 'plugin_report_traffic_settlement_detail');
-                                //报表状态更新
-                                $save_report_traffic_settlement=array();//一定要空
-                                $save_report_traffic_settlement['id']=$report_traffic_settlement_id;
-                                $save_report_traffic_settlement['status_detail']='执行中';
-                                $save_report_traffic_settlement['last_modified'] = date('Y-m-d H:i:s', time());
-                                $id=sql_save($save_report_traffic_settlement, 'plugin_report_traffic_settlement');
+                                sql_save($report_traffic_settlement_detail, 'plugin_report_traffic_settlement_detail');
 
                             }
                         }
@@ -111,5 +105,13 @@ foreach($report_traffic_settlement_array as $report_traffic_settlement) {
         }
     }
     //第一层数据遍历end
+    //报表状态更新
+    $save_report_traffic_settlement=array();//一定要空
+    $save_report_traffic_settlement['id']=$report_traffic_settlement_id;
+    $save_report_traffic_settlement['status_detail']='执行中';
+    $save_report_traffic_settlement['last_modified'] = date('Y-m-d H:i:s', time());
+    // 把开始时间更新了，不然每次都是从创建时间开始算，时间久了效率越来越低
+    $save_report_traffic_settlement['exec_date'] = date('Y-m-d', time()-86400);
+    sql_save($save_report_traffic_settlement, 'plugin_report_traffic_settlement');
 }
 //遍历集合end

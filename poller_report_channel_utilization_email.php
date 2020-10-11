@@ -57,6 +57,7 @@ foreach($report_channel_utilization_array as $report_channel_utilization) {
         //cacti_log('实时统计data_end_date=' . $data_end_date);
         //cacti_log('实时统计data_begin_date=' . $data_begin_date);
         channel_utilization_excel($report_channel_utilization,'实时统计',$data_begin_date,$data_end_date);
+        $save = array();
         $save['id']=$report_channel_utilization['id'];
         $save['status_report']='执行中';
         sql_save($save, 'plugin_report_channel_utilization');

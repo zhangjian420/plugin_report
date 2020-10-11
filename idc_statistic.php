@@ -423,7 +423,8 @@ function idc_statistic(){
     if (get_request_var('filter') != '') {
         $sql_where =$sql_where . " AND (name LIKE '%" . get_request_var('filter') . "%')";
     }
-    $sql_join = "LEFT JOIN user_auth_perms b on b.item_id = a.id and b.type = 103 and b.user_id =". $_SESSION['sess_user_id'];
+    $sql_join = "LEFT JOIN user_auth_group_perms b on b.item_id = a.id and b.type = 103
+    and b.group_id = (select group_id from user_auth_group_members where user_id =". $_SESSION['sess_user_id'] . ") ";
     $sql_where .= ' and b.item_id is null ';
     
     $total_rows = db_fetch_cell("SELECT COUNT(*) FROM plugin_report_idc_statistic a $sql_join WHERE 1=1 $sql_where");

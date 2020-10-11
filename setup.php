@@ -67,6 +67,10 @@ function report_draw_navigation_text ($nav) {
     $nav['report.php:channel_utilization_edit'] = array('title' => "宽带通道预警编辑", 'mapping' => 'report:,report.php:channel_utilization', 'url' => 'report.php?action=channel_utilization_edit', 'level' => '2');
     $nav['report.php:channel_utilization_import'] = array('title' => "宽带通道预警导出", 'mapping' => 'report:,report.php:channel_utilization', 'url' => 'report.php?action=channel_utilization_import', 'level' => '2');
 
+    $nav['report.php:traffic_detail'] = array('title' => "流量明细统计", 'mapping' => 'report:', 'url' => 'report.php?action=traffic_detail', 'level' => '1');
+    $nav['report.php:traffic_detail_edit'] = array('title' => "流量明细统计编辑", 'mapping' => 'report:,report.php:traffic_detail', 'url' => 'report.php?action=traffic_detail_edit', 'level' => '2');
+    $nav['report.php:traffic_detail_import'] = array('title' => "流量明细统计导出", 'mapping' => 'report:,report.php:traffic_detail', 'url' => 'report.php?action=traffic_detail_import', 'level' => '2');
+    
     return $nav;
 }
 /**
